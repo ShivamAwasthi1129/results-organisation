@@ -11,7 +11,7 @@ export function ApproachSection() {
     <section id="approach" className="relative bg-brand-light">
       <div className="relative h-64 md:h-80 overflow-hidden">
         <Image
-          src="/images/approach-bg.jpg"
+          src={a.backgroundImage || "/images/approach-bg.jpg"}
           alt="Aerial view of disaster recovery operations in progress"
           fill
           className="object-cover brightness-[0.45]"

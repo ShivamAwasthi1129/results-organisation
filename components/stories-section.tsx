@@ -32,35 +32,37 @@ export function StoriesSection() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-px bg-border border border-border">
-          {s.stories.map((story, index) => (
-            <article key={story.title} className="bg-brand-surface group overflow-hidden">
-              <div className="relative h-52 overflow-hidden">
+          {s.items.map((story) => (
+            <article key={story.title} className="bg-brand-light group flex flex-col h-full border border-brand-light-border">
+              <div className="relative aspect-[4/3] w-full overflow-hidden">
                 <Image
                   src={story.image}
                   alt={story.title}
                   fill
-                  className="object-cover brightness-[0.8] group-hover:scale-105 transition-transform duration-700"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  loading="eager"
-                  priority={index === 0}
+                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
-                <div className="absolute top-4 left-4">
-                  <span className="bg-brand-red text-primary-foreground text-xs font-bold tracking-widest uppercase px-3 py-1">
+                <div className="absolute top-4 left-4 bg-brand-light/90 backdrop-blur-sm px-3 py-1.5 border border-brand-light-border">
+                  <span className="text-xs font-bold tracking-widest uppercase text-brand-red">
                     {story.category}
                   </span>
                 </div>
               </div>
-              <div className="p-6">
-                <p className="text-xs text-muted-foreground tracking-wide mb-3">{story.date}</p>
-                <h3 className="text-lg font-black text-foreground leading-tight mb-3 text-balance group-hover:text-brand-red transition-colors duration-200">
+              <div className="p-8 flex flex-col flex-1">
+                <time className="text-xs font-semibold tracking-widest uppercase text-brand-light-muted mb-4 block">
+                  {story.date}
+                </time>
+                <h3 className="text-xl font-black leading-tight text-brand-light-text mb-4 text-balance group-hover:text-brand-red transition-colors duration-200">
                   {story.title}
                 </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5">{story.excerpt}</p>
+                <p className="text-sm text-brand-light-muted leading-relaxed mb-8 flex-1">
+                  {story.excerpt}
+                </p>
                 <Link
                   href={story.href}
-                  className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-foreground hover:text-brand-red transition-colors duration-200 group/link"
+                  className="inline-flex items-center gap-2 text-xs font-black tracking-widest uppercase text-brand-light-text hover:text-brand-red transition-colors duration-200 group/link mt-auto w-fit"
                 >
-                  Read More
+                  Read Dispatch
                   <ArrowRight size={12} className="group-hover/link:translate-x-1 transition-transform" />
                 </Link>
               </div>

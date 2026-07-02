@@ -19,11 +19,19 @@ const ContentContext = createContext<ContentContextType>({
   isDirty: false,
 })
 
-export function ContentProvider({ children }: { children: React.ReactNode }) {
-  const [content, setContent] = useState<SiteContent>(defaultContent)
+export function ContentProvider({ children, initialContent }: { children: React.ReactNode, initialContent?: SiteContent | null }) {
+  const [content, setContent] = useState<SiteContent>(initialContent || defaultContent)
   const [isDirty, setIsDirty] = useState(false)
 
   useEffect(() => {
+    // If we received server-side initialContent, we might want to prioritize it over localStorage,
+    // or maybe not. Assuming initialContent from server is always the freshest source of truth:
+    if (initialContent) {
+      setContent(initialContent)
+      setIsDirty(true)
+      return
+    }
+    
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
@@ -34,7 +42,7 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // ignore
     }
-  }, [])
+  }, [initialContent])
 
   const updateContent = useCallback((next: SiteContent) => {
     setContent(next)
@@ -47,14 +55,14 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const resetContent = useCallback(() => {
-    setContent(defaultContent)
+    setContent(initialContent || defaultContent)
     setIsDirty(false)
     try {
       localStorage.removeItem(STORAGE_KEY)
     } catch {
       // ignore
     }
-  }, [])
+  }, [initialContent])
 
   return (
     <ContentContext.Provider value={{ content, updateContent, resetContent, isDirty }}>

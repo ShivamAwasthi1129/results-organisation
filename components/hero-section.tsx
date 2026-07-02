@@ -84,7 +84,7 @@ export function HeroSection() {
         <div className="relative lg:w-[52%] flex-shrink-0 min-h-[400px] lg:min-h-0 rounded-t-2xl lg:rounded-2xl overflow-hidden mt-4 lg:mt-20 lg:mb-10 self-stretch">
           {/* Photo */}
           <Image
-            src="/images/hero-main.jpg"
+            src={h.heroImage || "/images/hero-main.jpg"}
             alt="R3sults Foundation responders providing emergency medical aid at a field operations site"
             fill
             className="object-cover object-center"

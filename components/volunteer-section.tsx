@@ -1,7 +1,13 @@
+"use client"
+
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
+import { useContent } from "@/lib/content-context"
 
 export function VolunteerSection() {
+  const { content } = useContent()
+  const { volunteerCard, partnerCard } = content.volunteer
+
   return (
     <section id="volunteer" className="bg-brand-light border-t border-brand-light-border py-20">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -11,18 +17,17 @@ export function VolunteerSection() {
             <div className="flex items-center gap-3 mb-6">
               <div className="w-8 h-0.5 bg-brand-red" />
               <span className="text-xs font-bold tracking-widest uppercase text-brand-red">
-                Get Involved
+                {volunteerCard.eyebrow}
               </span>
             </div>
             <h2 className="text-3xl md:text-4xl font-black text-brand-light-text text-balance mb-4">
-              Volunteer With Us
+              {volunteerCard.heading}
             </h2>
             <p className="text-brand-light-muted leading-relaxed mb-8">
-              We need skilled professionals — logistics coordinators, medical personnel, engineers,
-              communications specialists, and community liaisons. Your skills can save lives.
+              {volunteerCard.subtext}
             </p>
             <div className="space-y-3 mb-8">
-              {["Field Response Teams", "Logistics & Supply Chain", "Medical Support", "Community Training"].map((role) => (
+              {volunteerCard.roles.map((role) => (
                 <div key={role} className="flex items-center gap-3 text-sm text-brand-light-text">
                   <div className="w-1.5 h-1.5 bg-brand-red flex-shrink-0" />
                   {role}
@@ -30,10 +35,10 @@ export function VolunteerSection() {
               ))}
             </div>
             <Link
-              href="/volunteer"
+              href={volunteerCard.ctaLink}
               className="inline-flex items-center gap-2 bg-brand-red text-white text-sm font-bold px-7 py-3.5 tracking-widest uppercase hover:bg-brand-red/90 active:scale-95 transition-all duration-200 group"
             >
-              Apply to Volunteer
+              {volunteerCard.ctaText}
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
@@ -43,18 +48,17 @@ export function VolunteerSection() {
             <div className="flex items-center gap-3 mb-6">
               <div className="w-8 h-0.5 bg-brand-red" />
               <span className="text-xs font-bold tracking-widest uppercase text-brand-red">
-                Partnership
+                {partnerCard.eyebrow}
               </span>
             </div>
             <h2 className="text-3xl md:text-4xl font-black text-foreground text-balance mb-4">
-              Become a Partner
+              {partnerCard.heading}
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-8">
-              Corporate and institutional partners bring resources, networks, and expertise that
-              multiply our impact. Join a coalition of organizations committed to real results.
+              {partnerCard.subtext}
             </p>
             <div className="space-y-3 mb-8">
-              {["Corporate Matching Programs", "Resource & Equipment Donations", "Technology Partnerships", "Media & Communications"].map((role) => (
+              {partnerCard.roles.map((role) => (
                 <div key={role} className="flex items-center gap-3 text-sm text-foreground">
                   <div className="w-1.5 h-1.5 bg-brand-red flex-shrink-0" />
                   {role}
@@ -62,10 +66,10 @@ export function VolunteerSection() {
               ))}
             </div>
             <Link
-              href="/partner"
+              href={partnerCard.ctaLink}
               className="inline-flex items-center gap-2 border-2 border-brand-red text-brand-red text-sm font-bold px-7 py-3.5 tracking-widest uppercase hover:bg-brand-red hover:text-white active:scale-95 transition-all duration-200 group"
             >
-              Partner With Us
+              {partnerCard.ctaText}
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>

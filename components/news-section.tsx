@@ -3,81 +3,9 @@
 import { useState } from "react"
 import Link from "next/link"
 import { ArrowRight, Radio, ExternalLink, Clock, ChevronRight } from "lucide-react"
+import { useContent } from "@/lib/content-context"
 
-const leadStory = {
-  category: "Breaking",
-  source: "Reuters",
-  date: "March 1, 2026",
-  readTime: "4 min read",
-  title: "Catastrophic Flooding Displaces 1.2 Million Across Southeast Asia",
-  excerpt:
-    "Record monsoon rainfall has caused catastrophic flooding across Vietnam, Thailand, and Myanmar. The United Nations estimates 1.2 million people have been displaced, with hundreds of communities cut off from emergency services. Humanitarian organizations are mobilizing rapid-response teams amid rising death tolls.",
-  tags: ["Southeast Asia", "Flooding", "Displacement", "UN Response"],
-  href: "/stories",
-}
-
-const sideStories = [
-  {
-    category: "Wildfire",
-    source: "AP News",
-    date: "Feb 28, 2026",
-    title: "California Wildfires Force Mass Evacuations in Three Counties",
-    excerpt:
-      "Fast-moving wildfires driven by Santa Ana winds have prompted mandatory evacuations across 85,000 residents in Ventura, San Bernardino, and Riverside counties.",
-    href: "/stories",
-  },
-  {
-    category: "Earthquake",
-    source: "BBC",
-    date: "Feb 27, 2026",
-    title: "7.4 Magnitude Earthquake Strikes Off Japan's Pacific Coast",
-    excerpt:
-      "A powerful 7.4 magnitude earthquake struck 120km off the Tohoku coast. Tsunami warnings have been issued for low-lying coastal areas.",
-    href: "/stories",
-  },
-  {
-    category: "Hurricane",
-    source: "CNN",
-    date: "Feb 25, 2026",
-    title: "Caribbean Braces as Category 4 Storm Approaches Lesser Antilles",
-    excerpt:
-      "Authorities in Dominica, St. Lucia, and Martinique have issued mandatory evacuation orders as the storm intensifies to Category 4 with 145 mph winds.",
-    href: "/stories",
-  },
-]
-
-const wireItems = [
-  {
-    time: "2h ago",
-    headline: "FEMA activates Emergency Operations Center for Gulf Coast flooding",
-    source: "FEMA",
-  },
-  {
-    time: "4h ago",
-    headline: "WHO reports cholera risk rising in post-earthquake Haiti camps",
-    source: "WHO",
-  },
-  {
-    time: "6h ago",
-    headline: "Red Cross deploys 200 volunteers to Tennessee tornado zone",
-    source: "Red Cross",
-  },
-  {
-    time: "9h ago",
-    headline: "Pakistan declares national emergency as glacial lake outburst flood spreads",
-    source: "Reuters",
-  },
-  {
-    time: "12h ago",
-    headline: "Australian bushfire season declared 'worst in a decade' by meteorologists",
-    source: "ABC Australia",
-  },
-  {
-    time: "14h ago",
-    headline: "UN Security Council calls emergency session on Sudan humanitarian crisis",
-    source: "UN News",
-  },
-]
+// Hardcoded arrays removed to use dynamic context data
 
 const categoryColor = (cat: string) => {
   switch (cat.toLowerCase()) {
@@ -90,6 +18,8 @@ const categoryColor = (cat: string) => {
 }
 
 export function NewsSection() {
+  const { content } = useContent()
+  const { eyebrow, heading, subtext, leadStory, sideStories, wireItems } = content.news
   const [activeWire, setActiveWire] = useState<number | null>(null)
 
   return (
@@ -102,14 +32,14 @@ export function NewsSection() {
             <div className="flex items-center gap-3 mb-4">
               <div className="w-8 h-0.5 bg-brand-red" />
               <span className="text-xs font-bold tracking-widest uppercase text-brand-light-muted">
-                News & Media
+                {eyebrow}
               </span>
             </div>
             <h2 className="text-4xl md:text-5xl font-black text-brand-light-text tracking-tight text-balance">
-              Disaster Intelligence
+              {heading}
             </h2>
             <p className="text-brand-light-muted text-sm mt-3 max-w-lg leading-relaxed">
-              Real-time coverage of global disasters, emergency response operations, and humanitarian developments.
+              {subtext}
             </p>
           </div>
           <div className="flex items-center gap-2">

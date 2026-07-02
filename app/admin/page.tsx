@@ -154,13 +154,13 @@ function StoriesEditor({ draft, onChange }: { draft: SiteContent; onChange: (d: 
         <Field label="Eyebrow"><Input value={s.eyebrow} onChange={(v) => onChange({ ...draft, stories: { ...s, eyebrow: v } })} /></Field>
         <Field label="Heading"><Input value={s.heading} onChange={(v) => onChange({ ...draft, stories: { ...s, heading: v } })} /></Field>
       </SectionShell>
-      {s.stories.map((story, i) => (
+      {s.items.map((story, i) => (
         <SectionShell key={i} title={`Story ${i + 1}`}>
-          <Field label="Category"><Input value={story.category} onChange={(v) => { const st = [...s.stories]; st[i] = { ...st[i], category: v }; onChange({ ...draft, stories: { ...s, stories: st } }) }} /></Field>
-          <Field label="Date"><Input value={story.date} onChange={(v) => { const st = [...s.stories]; st[i] = { ...st[i], date: v }; onChange({ ...draft, stories: { ...s, stories: st } }) }} /></Field>
-          <Field label="Title"><Input value={story.title} onChange={(v) => { const st = [...s.stories]; st[i] = { ...st[i], title: v }; onChange({ ...draft, stories: { ...s, stories: st } }) }} /></Field>
-          <Field label="Excerpt"><Textarea value={story.excerpt} onChange={(v) => { const st = [...s.stories]; st[i] = { ...st[i], excerpt: v }; onChange({ ...draft, stories: { ...s, stories: st } }) }} /></Field>
-          <Field label="Link (href)"><Input value={story.href} onChange={(v) => { const st = [...s.stories]; st[i] = { ...st[i], href: v }; onChange({ ...draft, stories: { ...s, stories: st } }) }} /></Field>
+          <Field label="Category"><Input value={story.category} onChange={(v) => { const st = [...s.items]; st[i] = { ...st[i], category: v }; onChange({ ...draft, stories: { ...s, items: st } }) }} /></Field>
+          <Field label="Date"><Input value={story.date} onChange={(v) => { const st = [...s.items]; st[i] = { ...st[i], date: v }; onChange({ ...draft, stories: { ...s, items: st } }) }} /></Field>
+          <Field label="Title"><Input value={story.title} onChange={(v) => { const st = [...s.items]; st[i] = { ...st[i], title: v }; onChange({ ...draft, stories: { ...s, items: st } }) }} /></Field>
+          <Field label="Excerpt"><Textarea value={story.excerpt} onChange={(v) => { const st = [...s.items]; st[i] = { ...st[i], excerpt: v }; onChange({ ...draft, stories: { ...s, items: st } }) }} /></Field>
+          <Field label="Link (href)"><Input value={story.href} onChange={(v) => { const st = [...s.items]; st[i] = { ...st[i], href: v }; onChange({ ...draft, stories: { ...s, items: st } }) }} /></Field>
         </SectionShell>
       ))}
     </div>
