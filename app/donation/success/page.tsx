@@ -7,7 +7,7 @@ export default function DonationSuccessPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <SiteHeader />
-      <div className="flex-1 bg-brand-light flex items-center justify-center p-6">
+      <div className=" pt-28 flex-1 bg-brand-light flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-brand-light-surface border border-brand-light-border p-8 lg:p-12 text-center shadow-sm">
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 bg-brand-red/10 rounded-full flex items-center justify-center">
