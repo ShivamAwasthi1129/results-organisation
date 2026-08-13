@@ -8,15 +8,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
-  auth: {
-    user: process.env.EMAIL_ID,
-    pass: process.env.EMAIL_PASS,
-  },
-});
 
 export async function POST(req: NextRequest) {
   const fs = await import("fs");
@@ -55,6 +46,16 @@ export async function POST(req: NextRequest) {
 
       if (email) {
         try {
+          const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST || "smtp.gmail.com",
+            port: parseInt(process.env.SMTP_PORT || "587"),
+            secure: process.env.SMTP_SECURE === "true",
+            auth: {
+              user: process.env.EMAIL_ID,
+              pass: process.env.EMAIL_PASS,
+            },
+          });
+
           await transporter.sendMail({
             from: `"Results.org" <${process.env.EMAIL_ID}>`,
             to: email,
