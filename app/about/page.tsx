@@ -128,6 +128,8 @@ export default function AboutPage() {
             <p className="text-brand-muted-text text-sm">Donate, volunteer, or partner with us to build resilient communities.</p>
           </div>
           <div className="flex items-center gap-4">
+
+            
             <Link
               href="/volunteer"
               className="inline-flex items-center gap-2 border border-foreground text-foreground text-sm font-bold px-6 py-3 tracking-widest uppercase hover:bg-foreground hover:text-background transition-all duration-200"
