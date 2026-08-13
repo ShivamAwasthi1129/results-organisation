@@ -10,14 +10,12 @@ const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 
 export async function POST(req: NextRequest) {
-  const fs = await import("fs");
-  const logFile = "webhook-debug.log";
-  fs.appendFileSync(logFile, `\n\n--- Webhook Hit at ${new Date().toISOString()} ---\n`);
+  console.log(`\n\n--- Webhook Hit at ${new Date().toISOString()} ---\n`);
 
   const payload = await req.text();
   const sig = req.headers.get("stripe-signature");
 
-  fs.appendFileSync(logFile, `Signature present: ${!!sig}, Secret present: ${!!endpointSecret}\n`);
+  console.log(`Signature present: ${!!sig}, Secret present: ${!!endpointSecret}`);
 
   let event: Stripe.Event;
 
@@ -26,10 +24,9 @@ export async function POST(req: NextRequest) {
       throw new Error("Missing signature or secret");
     }
     event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
-    fs.appendFileSync(logFile, `Event constructed successfully: ${event.type}\n`);
+    console.log(`Event constructed successfully: ${event.type}`);
   } catch (err: any) {
     console.error(`Webhook Error: ${err.message}`);
-    fs.appendFileSync(logFile, `Webhook Error: ${err.message}\n`);
     return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
   }
 
@@ -42,7 +39,7 @@ export async function POST(req: NextRequest) {
       const amountTotal = session.amount_total;
       const amountFormatted = amountTotal ? (amountTotal / 100).toFixed(2) : "0.00";
 
-      fs.appendFileSync(logFile, `Extracted email: ${email}, amount: ${amountFormatted}\n`);
+      console.log(`Extracted email: ${email}, amount: ${amountFormatted}`);
 
       if (email) {
         try {
@@ -72,10 +69,8 @@ export async function POST(req: NextRequest) {
             `,
           });
           console.log(`Confirmation email sent to ${email}`);
-          fs.appendFileSync(logFile, `Email sent successfully to ${email}\n`);
         } catch (error: any) {
           console.error("Error sending email:", error);
-          fs.appendFileSync(logFile, `Error sending email: ${error.message}\n`);
         }
       }
       break;
