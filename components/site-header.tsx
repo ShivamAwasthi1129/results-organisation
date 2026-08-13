@@ -21,6 +21,7 @@ export function SiteHeader() {
     { label: "Impact", href: "/impact" },
     { label: "How We Operate", href: "/#operations" },
     { label: "Stories", href: "/stories" },
+    { label: "Disasters", href: "/disasters" },
   ]
 
   return (
@@ -67,7 +68,7 @@ export function SiteHeader() {
               Volunteer
             </Link>
             <Link
-              href="/#donate"
+              href="/donation"
               className="inline-flex items-center gap-2 bg-brand-red text-primary-foreground text-sm font-bold px-5 py-2.5 tracking-wide uppercase hover:bg-brand-red/90 active:scale-95 transition-all duration-200"
             >
               Donate Now
@@ -108,7 +109,7 @@ export function SiteHeader() {
               Volunteer
             </Link>
             <Link
-              href="/#donate"
+              href="/donation"
               onClick={() => setMobileOpen(false)}
               className="inline-flex items-center justify-center bg-brand-red text-primary-foreground text-sm font-bold px-6 py-3 tracking-widest uppercase mt-2"
             >
