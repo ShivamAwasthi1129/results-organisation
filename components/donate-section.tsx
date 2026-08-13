@@ -19,8 +19,33 @@ export function DonateSection() {
   const [selected, setSelected] = useState<number | null>(d.tiers[1]?.amount ?? null)
   const [custom, setCustom] = useState("")
   const [recurring, setRecurring] = useState(false)
+  const [isPending, setIsPending] = useState(false)
 
   const handleCustom = (val: string) => { setCustom(val); setSelected(null) }
+
+  const handleDonate = async () => {
+    const amount = selected || parseFloat(custom);
+    if (!amount || amount <= 0) return;
+
+    setIsPending(true);
+    try {
+      const res = await fetch("/api/checkout_sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount, recurring }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error(data.error);
+        setIsPending(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setIsPending(false);
+    }
+  }
 
   return (
     <section id="donate" className="bg-brand-light py-20 border-t border-brand-light-border">
@@ -95,9 +120,13 @@ export function DonateSection() {
               </button>
             </div>
 
-            <button className="w-full inline-flex items-center justify-center gap-2 bg-brand-red text-white text-sm font-bold px-8 py-4 tracking-widest uppercase hover:bg-brand-red/90 active:scale-95 transition-all duration-200 group">
-              Donate Now
-              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            <button 
+              onClick={handleDonate}
+              disabled={isPending || (!selected && !custom)}
+              className="w-full inline-flex items-center justify-center gap-2 bg-brand-red text-white text-sm font-bold px-8 py-4 tracking-widest uppercase hover:bg-brand-red/90 active:scale-95 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isPending ? "Processing..." : "Donate Now"}
+              {!isPending && <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />}
             </button>
             <p className="text-xs text-brand-light-muted text-center mt-4">
               Secure 256-bit encrypted donation. Tax-deductible. EIN: XX-XXXXXXX

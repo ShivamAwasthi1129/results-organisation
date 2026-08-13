@@ -1,0 +1,54 @@
+
+
+--- Webhook Hit at 2026-07-13T15:35:01.548Z ---
+Signature present: true, Secret present: true
+Event constructed successfully: payment_intent.succeeded
+
+
+--- Webhook Hit at 2026-07-13T15:35:01.658Z ---
+Signature present: true, Secret present: true
+Event constructed successfully: charge.succeeded
+
+
+--- Webhook Hit at 2026-07-13T15:35:01.719Z ---
+Signature present: true, Secret present: true
+Event constructed successfully: payment_intent.created
+
+
+--- Webhook Hit at 2026-07-13T15:35:02.280Z ---
+Signature present: true, Secret present: true
+Event constructed successfully: checkout.session.completed
+Extracted email: shivam@hexerve.com, amount: 250.00
+
+
+--- Webhook Hit at 2026-07-13T15:35:04.637Z ---
+Signature present: true, Secret present: true
+Event constructed successfully: charge.updated
+Email sent successfully to shivam@hexerve.com
+
+
+--- Webhook Hit at 2026-07-13T15:36:22.580Z ---
+Signature present: true, Secret present: true
+Event constructed successfully: charge.succeeded
+
+
+--- Webhook Hit at 2026-07-13T15:36:22.688Z ---
+Signature present: true, Secret present: true
+Event constructed successfully: payment_intent.succeeded
+
+
+--- Webhook Hit at 2026-07-13T15:36:22.722Z ---
+Signature present: true, Secret present: true
+Event constructed successfully: payment_intent.created
+
+
+--- Webhook Hit at 2026-07-13T15:36:22.910Z ---
+Signature present: true, Secret present: true
+Event constructed successfully: checkout.session.completed
+Extracted email: shivamawasthi1129@gmail.com, amount: 1000.00
+
+
+--- Webhook Hit at 2026-07-13T15:36:25.755Z ---
+Signature present: true, Secret present: true
+Event constructed successfully: charge.updated
+Email sent successfully to shivamawasthi1129@gmail.com
