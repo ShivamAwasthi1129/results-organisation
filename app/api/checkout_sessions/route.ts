@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     const unitAmount = Math.round(amount * 100);
     const getAppUrl = () => {
       if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
-      if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+      if (process.env.VERCEL_ENV === "production") return "https://www.r3sults.org";
       if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
       return "http://localhost:3000";
     };
