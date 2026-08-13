@@ -19,7 +19,13 @@ export async function POST(req: NextRequest) {
 
     // Amount comes in as dollars, convert to cents for Stripe
     const unitAmount = Math.round(amount * 100);
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.DOMAIN_NAME || "http://localhost:3000";
+    const getAppUrl = () => {
+      if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+      if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+      if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+      return "http://localhost:3000";
+    };
+    const appUrl = getAppUrl();
 
     const sessionData: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ["card"],
