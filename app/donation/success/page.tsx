@@ -3,6 +3,8 @@ import { CheckCircle2, ArrowLeft } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 
+
+
 export default function DonationSuccessPage() {
   return (
     <div className="flex flex-col min-h-screen">
