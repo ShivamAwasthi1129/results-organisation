@@ -125,7 +125,8 @@ export default function AboutPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border border-border p-10">
           <div>
             <h3 className="text-2xl font-black text-foreground mb-2">Join the mission</h3>
-            <p className="text-brand-muted-text text-sm">Donate, volunteer, or partner with us to build resilient communities.</p>
+            <p className="text-brand-muted-text text-sm">
+              Donate, volunteer, or partner with us to build resilient communities.</p>
           </div>
           <div className="flex items-center gap-4">
 
