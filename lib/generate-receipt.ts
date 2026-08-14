@@ -34,9 +34,15 @@ export async function generateReceiptPDF(data: ReceiptData): Promise<Buffer> {
       // Header right side
       doc.font('Helvetica-Bold').fontSize(16).text('Charitable Contribution Receipt', 200, 50, { align: 'right' });
       doc.font('Helvetica').fontSize(10);
-      doc.text(`Receipt No.: `, 200, 75, { align: 'right', continued: true }).font('Helvetica-Bold').text(data.receiptNo);
-      doc.font('Helvetica').text(`Donation Date: `, 200, 90, { align: 'right', continued: true }).font('Helvetica-Bold').text(data.donationDate);
-      doc.font('Helvetica').text(`Receipt Date: `, 200, 105, { align: 'right', continued: true }).font('Helvetica-Bold').text(data.donationDate);
+      
+      doc.text('Receipt No.:', 350, 75, { width: 80, align: 'right' });
+      doc.font('Helvetica-Bold').text(data.receiptNo, 440, 75);
+      
+      doc.font('Helvetica').text('Donation Date:', 350, 90, { width: 80, align: 'right' });
+      doc.font('Helvetica-Bold').text(data.donationDate, 440, 90);
+      
+      doc.font('Helvetica').text('Receipt Date:', 350, 105, { width: 80, align: 'right' });
+      doc.font('Helvetica-Bold').text(data.donationDate, 440, 105);
 
       // Red line
       doc.moveTo(50, 140).lineTo(545, 140).lineWidth(2).strokeColor('#c00000').stroke();
