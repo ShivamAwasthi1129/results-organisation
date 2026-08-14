@@ -15,6 +15,8 @@ const trustDescs = [
 interface CampaignData {
   id: string;
   name: string;
+  location?: string;
+  date?: string;
   tiers: { amount: number; label: string; description: string }[];
 }
 
@@ -22,6 +24,8 @@ const CAMPAIGNS: CampaignData[] = [
   {
     id: "CAM-001",
     name: "Standard Contribution",
+    location: "Global",
+    date: "Ongoing",
     tiers: [
       { amount: 50, label: "General Relief", description: "Supports day-to-day operations and general preparedness." },
       { amount: 100, label: "Community Aid", description: "Fund community-led programs and resources." },
@@ -31,6 +35,8 @@ const CAMPAIGNS: CampaignData[] = [
   {
     id: "CAM-002",
     name: "Venezuela Earthquake Relief",
+    location: "Caracas, Venezuela",
+    date: "June 24, 2026",
     tiers: [
       { amount: 50, label: "Emergency Food & Water", description: "Provides immediate clean water and ration packs for a displaced family." },
       { amount: 100, label: "Medical Supplies Kit", description: "Funds essential medical supplies and first-aid kits for disaster response." },
@@ -40,6 +46,8 @@ const CAMPAIGNS: CampaignData[] = [
   {
     id: "CAM-003",
     name: "Japan Earthquake Relief",
+    location: "Fukushima, Japan",
+    date: "July 12, 2026",
     tiers: [
       { amount: 50, label: "Hygiene & Sanitation Kit", description: "Supplies hygiene products and sanitizing items for evacuation centers." },
       { amount: 100, label: "Warm Blankets & Apparel", description: "Provides thermal blankets and cold-weather clothing for survivors." },
@@ -49,6 +57,8 @@ const CAMPAIGNS: CampaignData[] = [
   {
     id: "CAM-004",
     name: "Turkey Earthquake Relief",
+    location: "Van Province, Turkey",
+    date: "August 5, 2026",
     tiers: [
       { amount: 50, label: "Warm Meals Distribution", description: "Funds hot meals for families in temporary refugee settlements." },
       { amount: 100, label: "Clean Water Station", description: "Helps set up temporary clean water distribution points." },
@@ -58,6 +68,8 @@ const CAMPAIGNS: CampaignData[] = [
   {
     id: "CAM-005",
     name: "Chile Earthquake Relief",
+    location: "Valparaiso, Chile",
+    date: "August 10, 2026",
     tiers: [
       { amount: 50, label: "First Aid & Triage Support", description: "Provides medical kits for triage centers." },
       { amount: 100, label: "Baby & Toddler Support", description: "Funds baby formula, diapers, and nutrition packs." },
@@ -67,6 +79,8 @@ const CAMPAIGNS: CampaignData[] = [
   {
     id: "CAM-006",
     name: "Colombia Earthquake Relief 2026",
+    location: "Bogota, Colombia",
+    date: "March 14, 2026",
     tiers: [
       { amount: 50, label: "Survival Food Package", description: "Supplies high-nutrition dry food rations for a family." },
       { amount: 100, label: "First Response Medication", description: "Funds antibiotics, bandages, and critical medication." },
@@ -76,6 +90,8 @@ const CAMPAIGNS: CampaignData[] = [
   {
     id: "CAM-007",
     name: "Typhoon Saola Relief",
+    location: "Philippines & Taiwan",
+    date: "September 2026",
     tiers: [
       { amount: 50, label: "Flashlights & Emergency Batteries", description: "Supplies lighting and power sources to storm victims." },
       { amount: 100, label: "Waterproof Tarp & Rope", description: "Provides immediate protection for homes with damaged roofs." },
@@ -85,6 +101,8 @@ const CAMPAIGNS: CampaignData[] = [
   {
     id: "CAM-008",
     name: "Mediterranean Wildfires Relief",
+    location: "Greece & Italy",
+    date: "August 2026",
     tiers: [
       { amount: 50, label: "Respiratory Protection Gear", description: "Supplies protective smoke masks and filters." },
       { amount: 100, label: "Wildlife Rescue & Rehab", description: "Funds treatment for animals affected by forest fires." },
@@ -178,7 +196,7 @@ export function DonateSection() {
                 >
                   {CAMPAIGNS.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.name} ({c.id})
+                      {c.name} ({c.id}) {c.location ? `— ${c.location}` : ""} {c.date ? `| ${c.date}` : ""}
                     </option>
                   ))}
                 </select>
