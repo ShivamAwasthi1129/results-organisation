@@ -148,7 +148,9 @@ export function DonateSection() {
           amount, 
           recurring, 
           campaign: activeCampaign.name,
-          campaignId: activeCampaign.id
+          campaignId: activeCampaign.id,
+          campaignLocation: activeCampaign.location,
+          campaignDate: activeCampaign.date,
         }),
       });
       const data = await res.json();

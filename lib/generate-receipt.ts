@@ -12,6 +12,8 @@ export interface ReceiptData {
   amount: string;
   campaign: string;
   campaignId?: string;
+  campaignLocation?: string;
+  campaignDate?: string;
   contributionType: string;
   paymentMethod: string;
   transactionId: string;
@@ -34,36 +36,36 @@ export async function generateReceiptPDF(data: ReceiptData): Promise<Buffer> {
         doc.image(logoPath, 50, 45, { width: 160 });
       }
 
-      // Header right side
+      // Header right side - reduced font size and adjusted positions to avoid overlaps
       doc.font('Helvetica-Bold').fontSize(16).text('Charitable Contribution Receipt', 200, 50, { align: 'right' });
-      doc.font('Helvetica').fontSize(10);
+      doc.font('Helvetica').fontSize(9);
       
       doc.text('Receipt No.:', 350, 75, { width: 80, align: 'right' });
       doc.font('Helvetica-Bold').text(data.receiptNo, 440, 75);
       
       doc.font('Helvetica').text('Donation Date:', 350, 90, { width: 80, align: 'right' });
       const fullDateStr = data.donationTime ? `${data.donationDate} at ${data.donationTime}` : data.donationDate;
-      doc.font('Helvetica-Bold').text(fullDateStr, 440, 90);
+      doc.font('Helvetica-Bold').text(fullDateStr, 440, 90, { width: 105 });
       
-      doc.font('Helvetica').text('Receipt Date:', 350, 105, { width: 80, align: 'right' });
-      doc.font('Helvetica-Bold').text(data.donationDate, 440, 105);
+      doc.font('Helvetica').text('Receipt Date:', 350, 115, { width: 80, align: 'right' });
+      doc.font('Helvetica-Bold').text(data.donationDate, 440, 115);
 
-      // Red line
-      doc.moveTo(50, 140).lineTo(545, 140).lineWidth(2).strokeColor('#c00000').stroke();
+      // Red line (shifted down)
+      doc.moveTo(50, 150).lineTo(545, 150).lineWidth(2).strokeColor('#c00000').stroke();
 
-      // Donor Information Section
-      doc.font('Helvetica-Bold').fontSize(12).fillColor('#c00000').text('DONOR INFORMATION', 50, 160);
+      // Donor Information Section (shifted down)
+      doc.font('Helvetica-Bold').fontSize(12).fillColor('#c00000').text('DONOR INFORMATION', 50, 170);
       doc.fillColor('black');
       
-      doc.font('Helvetica').fontSize(10).text('Donor:', 50, 185);
-      doc.font('Helvetica-Bold').text(data.donorName, 150, 185);
+      doc.font('Helvetica').fontSize(10).text('Donor:', 50, 195);
+      doc.font('Helvetica-Bold').text(data.donorName, 150, 195);
       
       if (data.donorAddress) {
-        doc.font('Helvetica').text('Address:', 50, 205);
-        doc.font('Helvetica').text(data.donorAddress, 150, 205);
+        doc.font('Helvetica').text('Address:', 50, 215);
+        doc.font('Helvetica').text(data.donorAddress, 150, 215);
       }
       
-      const emailY = data.donorAddress ? 225 : 205;
+      const emailY = data.donorAddress ? 235 : 215;
       doc.font('Helvetica').text('Email:', 50, emailY);
       doc.font('Helvetica').text(data.donorEmail, 150, emailY);
 
@@ -73,26 +75,36 @@ export async function generateReceiptPDF(data: ReceiptData): Promise<Buffer> {
         doc.font('Helvetica').text(data.donorLocation, 150, locY);
       }
 
-      // Contribution Details Section
-      let detailsY = data.donorAddress ? 260 : 240;
+      // Contribution Details Section (shifted down)
+      let detailsY = data.donorAddress ? 270 : 250;
       if (data.donorLocation) {
         detailsY += 20;
       }
       doc.font('Helvetica-Bold').fontSize(12).fillColor('#c00000').text('CONTRIBUTION DETAILS', 50, detailsY);
       
-      // Amount / Campaign Box
+      // Amount / Campaign Box - Expanded height to fit event info
       const boxY = detailsY + 20;
-      doc.rect(50, boxY, 495, 60).fillColor('#f8f9fa').fill();
+      doc.rect(50, boxY, 495, 80).fillColor('#f8f9fa').fill();
       
       doc.fillColor('#888888').font('Helvetica').fontSize(9).text('DONATION AMOUNT', 65, boxY + 15);
       doc.fillColor('#888888').font('Helvetica').text('CAMPAIGN', 65, boxY + 15, { align: 'right', width: 465 });
       
       doc.fillColor('#c00000').font('Helvetica-Bold').fontSize(18).text(`$${data.amount} USD`, 65, boxY + 35);
       const campaignText = data.campaignId ? `${data.campaign} (${data.campaignId})` : data.campaign;
-      doc.fillColor('black').font('Helvetica-Bold').fontSize(12).text(campaignText, 65, boxY + 40, { align: 'right', width: 465 });
+      doc.fillColor('black').font('Helvetica-Bold').fontSize(12).text(campaignText, 65, boxY + 35, { align: 'right', width: 465 });
 
-      // Contribution Meta
-      const metaY = boxY + 80;
+      if (data.campaignLocation || data.campaignDate) {
+        let eventStr = "";
+        if (data.campaignLocation && data.campaignDate) {
+          eventStr = `${data.campaignLocation}  |  ${data.campaignDate}`;
+        } else {
+          eventStr = data.campaignLocation || data.campaignDate || "";
+        }
+        doc.fillColor('#666666').font('Helvetica').fontSize(8.5).text(eventStr, 65, boxY + 55, { align: 'right', width: 465 });
+      }
+
+      // Contribution Meta (shifted down to fit expanded box)
+      const metaY = boxY + 100;
       doc.font('Helvetica').fontSize(10).fillColor('#666666').text('Contribution Type:', 50, metaY);
       doc.fillColor('black').text(data.contributionType, 180, metaY);
       

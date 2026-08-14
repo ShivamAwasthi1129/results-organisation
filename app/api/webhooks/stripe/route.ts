@@ -46,6 +46,8 @@ export async function POST(req: NextRequest) {
 
       const campaign = session.metadata?.campaign || "Standard Contribution";
       const campaignId = session.metadata?.campaign_id || "CAM-001";
+      const campaignLocation = session.metadata?.campaign_location || "";
+      const campaignDate = session.metadata?.campaign_date || "";
 
       let paymentMethodStr = "Credit Card";
       let transactionIdStr = session.id;
@@ -97,6 +99,8 @@ export async function POST(req: NextRequest) {
             amount: amountFormatted,
             campaign: campaign,
             campaignId: campaignId,
+            campaignLocation: campaignLocation || undefined,
+            campaignDate: campaignDate || undefined,
             contributionType: session.mode === 'subscription' ? 'Monthly Recurring Donation' : 'Monetary Donation',
             paymentMethod: paymentMethodStr,
             transactionId: transactionIdStr,
@@ -112,6 +116,10 @@ export async function POST(req: NextRequest) {
               pass: process.env.EMAIL_PASS,
             },
           });
+
+          const campaignImpactText = campaign === "Standard Contribution" 
+            ? "various natural disasters and humanitarian crises" 
+            : campaign;
 
           await transporter.sendMail({
             from: `"R3SULTS Foundation" <${process.env.EMAIL_ID}>`,
@@ -136,7 +144,7 @@ export async function POST(req: NextRequest) {
                 <p>No goods or services were provided in exchange for this contribution. Please consult your tax adviser regarding the deductibility of your gift.</p>
                 
                 <p style="margin-top: 20px; font-weight: bold;">Your Impact</p>
-                <p>Your contribution helps us deliver urgent humanitarian assistance — shelter, supplies, and recovery support — to communities affected by disasters like the recent earthquakes in Venezuela. Because of donors like you, help arrives when it matters most.</p>
+                <p>Your contribution helps us deliver urgent humanitarian assistance — shelter, supplies, and recovery support — to communities affected by disasters like ${campaignImpactText}. Because of donors like you, help arrives when it matters most.</p>
                 <p>Thank you for helping communities when they need it most.</p>
                 
                 <p style="margin-top: 30px;">With gratitude,</p>
