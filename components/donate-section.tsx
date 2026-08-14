@@ -12,28 +12,110 @@ const trustDescs = [
   "Set up monthly giving for sustained community support.",
 ]
 
+interface CampaignData {
+  id: string;
+  name: string;
+  tiers: { amount: number; label: string; description: string }[];
+}
+
+const CAMPAIGNS: CampaignData[] = [
+  {
+    id: "CAM-001",
+    name: "Standard Contribution",
+    tiers: [
+      { amount: 50, label: "General Relief", description: "Supports day-to-day operations and general preparedness." },
+      { amount: 100, label: "Community Aid", description: "Fund community-led programs and resources." },
+      { amount: 250, label: "Sustaining Gift", description: "Provides ongoing support for our operational capabilities." },
+    ]
+  },
+  {
+    id: "CAM-002",
+    name: "Venezuela Earthquake Relief",
+    tiers: [
+      { amount: 50, label: "Emergency Food & Water", description: "Provides immediate clean water and ration packs for a displaced family." },
+      { amount: 100, label: "Medical Supplies Kit", description: "Funds essential medical supplies and first-aid kits for disaster response." },
+      { amount: 250, label: "Temporary Shelter Tent", description: "Supplies a family-sized temporary thermal shelter for those left homeless." },
+    ]
+  },
+  {
+    id: "CAM-003",
+    name: "Japan Earthquake Relief",
+    tiers: [
+      { amount: 50, label: "Hygiene & Sanitation Kit", description: "Supplies hygiene products and sanitizing items for evacuation centers." },
+      { amount: 100, label: "Warm Blankets & Apparel", description: "Provides thermal blankets and cold-weather clothing for survivors." },
+      { amount: 250, label: "Rescue Team Support", description: "Funds search-and-rescue teams and structural inspection gear." },
+    ]
+  },
+  {
+    id: "CAM-004",
+    name: "Turkey Earthquake Relief",
+    tiers: [
+      { amount: 50, label: "Warm Meals Distribution", description: "Funds hot meals for families in temporary refugee settlements." },
+      { amount: 100, label: "Clean Water Station", description: "Helps set up temporary clean water distribution points." },
+      { amount: 250, label: "Thermal Heating Unit", description: "Supplies heating equipment to keep families safe in freezing winter temperatures." },
+    ]
+  },
+  {
+    id: "CAM-005",
+    name: "Chile Earthquake Relief",
+    tiers: [
+      { amount: 50, label: "First Aid & Triage Support", description: "Provides medical kits for triage centers." },
+      { amount: 100, label: "Baby & Toddler Support", description: "Funds baby formula, diapers, and nutrition packs." },
+      { amount: 250, label: "Debris & Emergency Tool Kit", description: "Provides shovels, helmets, and tools for clear-up teams." },
+    ]
+  },
+  {
+    id: "CAM-006",
+    name: "Colombia Earthquake Relief 2026",
+    tiers: [
+      { amount: 50, label: "Survival Food Package", description: "Supplies high-nutrition dry food rations for a family." },
+      { amount: 100, label: "First Response Medication", description: "Funds antibiotics, bandages, and critical medication." },
+      { amount: 250, label: "Rebuilding Supplies", description: "Contributes to building materials for homes destroyed by structural failure." },
+    ]
+  },
+  {
+    id: "CAM-007",
+    name: "Typhoon Saola Relief",
+    tiers: [
+      { amount: 50, label: "Flashlights & Emergency Batteries", description: "Supplies lighting and power sources to storm victims." },
+      { amount: 100, label: "Waterproof Tarp & Rope", description: "Provides immediate protection for homes with damaged roofs." },
+      { amount: 250, label: "Water Purification Systems", description: "Funds high-volume portable filtration systems." },
+    ]
+  },
+  {
+    id: "CAM-008",
+    name: "Mediterranean Wildfires Relief",
+    tiers: [
+      { amount: 50, label: "Respiratory Protection Gear", description: "Supplies protective smoke masks and filters." },
+      { amount: 100, label: "Wildlife Rescue & Rehab", description: "Funds treatment for animals affected by forest fires." },
+      { amount: 250, label: "Firefighter Support Kit", description: "Provides cooling equipment and hydration for volunteer responders." },
+    ]
+  }
+];
+
 export function DonateSection() {
   const { content } = useContent()
   const d = content.donate
 
-  const [selected, setSelected] = useState<number | null>(d.tiers[1]?.amount ?? null)
+  const [campaignId, setCampaignId] = useState("CAM-001")
+  const activeCampaign = CAMPAIGNS.find(c => c.id === campaignId) || CAMPAIGNS[0];
+  const activeTiers = activeCampaign.tiers;
+
+  const [selected, setSelected] = useState<number | null>(activeTiers[1]?.amount ?? 100)
   const [custom, setCustom] = useState("")
   const [recurring, setRecurring] = useState(false)
   const [isPending, setIsPending] = useState(false)
-  const [campaign, setCampaign] = useState("General Fund")
-
-  const campaigns = [
-    "General Fund",
-    "Colombia Earthquake Relief 2026",
-    "Venezuela Earthquake Relief",
-    "Japan Earthquake Relief",
-    "Turkey Earthquake Relief",
-    "Chile Earthquake Relief",
-    "Typhoon Saola Relief",
-    "Mediterranean Wildfires Relief"
-  ];
 
   const handleCustom = (val: string) => { setCustom(val); setSelected(null) }
+
+  const handleCampaignChange = (id: string) => {
+    setCampaignId(id);
+    const targetCampaign = CAMPAIGNS.find(c => c.id === id) || CAMPAIGNS[0];
+    // Keep amount selected if it exists in the new campaign, otherwise default to second tier
+    if (selected && !targetCampaign.tiers.some(t => t.amount === selected)) {
+      setSelected(targetCampaign.tiers[1]?.amount ?? 100);
+    }
+  }
 
   const handleDonate = async () => {
     const amount = selected || parseFloat(custom);
@@ -44,7 +126,12 @@ export function DonateSection() {
       const res = await fetch("/api/checkout_sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount, recurring, campaign }),
+        body: JSON.stringify({ 
+          amount, 
+          recurring, 
+          campaign: activeCampaign.name,
+          campaignId: activeCampaign.id
+        }),
       });
       const data = await res.json();
       if (data.url) {
@@ -78,16 +165,39 @@ export function DonateSection() {
           {/* Donation form */}
           <div className="p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-brand-light-border bg-brand-light">
             <h3 className="text-sm font-black tracking-widest uppercase text-brand-light-text mb-6">Choose Your Impact</h3>
+            
+            {/* Campaign Select - Moved to the Top */}
+            <div className="mb-6">
+              <label htmlFor="campaign-select" className="block text-sm font-bold text-brand-light-text mb-2">Select Campaign</label>
+              <div className="relative">
+                <select
+                  id="campaign-select"
+                  value={campaignId}
+                  onChange={(e) => handleCampaignChange(e.target.value)}
+                  className="w-full appearance-none bg-brand-light-surface border border-brand-light-border text-brand-light-text text-sm py-3 px-4 outline-none focus:border-brand-red transition-colors cursor-pointer"
+                >
+                  {CAMPAIGNS.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name} ({c.id})
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-brand-light-muted">
+                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Dynamic Amount Tiers */}
             <div className="space-y-3 mb-6">
-              {d.tiers.map((tier) => (
+              {activeTiers.map((tier) => (
                 <button
                   key={tier.amount}
                   onClick={() => { setSelected(tier.amount); setCustom("") }}
-                  className={`w-full text-left p-4 border transition-all duration-200 ${
-                    selected === tier.amount
+                  className={`w-full text-left p-4 border transition-all duration-200 ${selected === tier.amount
                       ? "border-brand-red bg-brand-red/5"
                       : "border-brand-light-border hover:border-brand-light-muted bg-brand-light"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-black text-brand-light-text">
@@ -116,42 +226,24 @@ export function DonateSection() {
               </div>
             </div>
 
-            <div className="mb-6">
-              <label htmlFor="campaign-select" className="block text-sm font-bold text-brand-light-text mb-2">Select Campaign</label>
-              <div className="relative">
-                <select
-                  id="campaign-select"
-                  value={campaign}
-                  onChange={(e) => setCampaign(e.target.value)}
-                  className="w-full appearance-none bg-brand-light-surface border border-brand-light-border text-brand-light-text text-sm py-3 px-4 outline-none focus:border-brand-red transition-colors cursor-pointer"
-                >
-                  {campaigns.map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-brand-light-muted">
-                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between mb-8 p-4 border border-brand-light-border bg-brand-light-surface cursor-pointer rounded-md hover:border-brand-red/30 transition-colors" onClick={() => setRecurring(!recurring)}>
+            {/* Redesigned Monthly Toggle Switch */}
+            <div className="flex items-center justify-between mb-8 p-4 border border-brand-light-border bg-brand-light-surface rounded-md">
               <div>
                 <p className="text-sm font-bold text-brand-light-text">Monthly Recurring Donation</p>
                 <p className="text-xs text-brand-light-muted mt-0.5">Sustained support for long-term recovery</p>
               </div>
-              <button
-                onClick={(e) => { e.stopPropagation(); setRecurring(!recurring) }}
-                className={`relative w-14 h-7 rounded-full transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 ${recurring ? "bg-brand-red" : "bg-brand-light-border"}`}
-                aria-label={recurring ? "Disable recurring donation" : "Enable recurring donation"}
-                role="switch"
-                aria-checked={recurring}
-              >
-                <span className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform duration-300 ease-in-out shadow-md ${recurring ? "translate-x-8" : "translate-x-1"}`} />
-              </button>
+              <label className="relative inline-flex items-center cursor-pointer select-none">
+                <input 
+                  type="checkbox" 
+                  checked={recurring} 
+                  onChange={() => setRecurring(!recurring)} 
+                  className="sr-only peer" 
+                />
+                <div className="w-11 h-6 bg-brand-light-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-red"></div>
+              </label>
             </div>
 
-            <button 
+            <button
               onClick={handleDonate}
               disabled={isPending || (!selected && !custom)}
               className="w-full inline-flex items-center justify-center gap-2 bg-brand-red text-white text-sm font-bold px-8 py-4 tracking-widest uppercase hover:bg-brand-red/90 active:scale-95 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"

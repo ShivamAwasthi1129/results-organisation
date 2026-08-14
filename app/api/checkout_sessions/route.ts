@@ -8,7 +8,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { amount, recurring, campaign } = body;
+    const { amount, recurring, campaign, campaignId } = body;
 
     if (!amount || amount <= 0) {
       return NextResponse.json(
@@ -30,7 +30,8 @@ export async function POST(req: NextRequest) {
     const sessionData: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ["card"],
       metadata: {
-        campaign: campaign || "General Fund",
+        campaign: campaign || "Standard Contribution",
+        campaign_id: campaignId || "CAM-001",
       },
       line_items: [
         {

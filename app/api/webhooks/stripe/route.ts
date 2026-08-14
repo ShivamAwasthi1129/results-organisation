@@ -35,16 +35,17 @@ export async function POST(req: NextRequest) {
   switch (event.type) {
     case "checkout.session.completed":
       const sessionBase = event.data.object as Stripe.Checkout.Session;
-      
+
       const session = await stripe.checkout.sessions.retrieve(sessionBase.id, {
         expand: ['payment_intent', 'payment_intent.payment_method', 'subscription'],
       });
-      
+
       const email = session.customer_email || session.customer_details?.email;
       const amountTotal = session.amount_total;
       const amountFormatted = amountTotal ? (amountTotal / 100).toFixed(2) : "0.00";
-      
-      const campaign = session.metadata?.campaign || "General Fund";
+
+      const campaign = session.metadata?.campaign || "Standard Contribution";
+      const campaignId = session.metadata?.campaign_id || "CAM-001";
 
       let paymentMethodStr = "Credit Card";
       let transactionIdStr = session.id;
@@ -64,6 +65,17 @@ export async function POST(req: NextRequest) {
         paymentMethodStr = "Recurring Subscription";
       }
 
+      let donorLocation = "";
+      if (session.customer_details?.address) {
+        const city = session.customer_details.address.city;
+        const country = session.customer_details.address.country;
+        if (city && country) {
+          donorLocation = `${city}, ${country}`;
+        } else if (country) {
+          donorLocation = country;
+        }
+      }
+
       console.log(`Extracted email: ${email}, amount: ${amountFormatted}`);
 
       if (email) {
@@ -71,18 +83,24 @@ export async function POST(req: NextRequest) {
           const name = session.customer_details?.name || "Donor";
           const randomStr = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
           const receiptNo = `R3S-${new Date().getFullYear()}-${randomStr}`;
-          const donationDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+          
+          const createdTimestamp = session.created ? new Date(session.created * 1000) : new Date();
+          const donationDate = createdTimestamp.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+          const donationTime = createdTimestamp.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
 
           const pdfBuffer = await generateReceiptPDF({
             receiptNo,
             donationDate,
+            donationTime,
             donorName: name,
             donorEmail: email,
             amount: amountFormatted,
             campaign: campaign,
+            campaignId: campaignId,
             contributionType: session.mode === 'subscription' ? 'Monthly Recurring Donation' : 'Monetary Donation',
             paymentMethod: paymentMethodStr,
             transactionId: transactionIdStr,
+            donorLocation: donorLocation || undefined,
           });
 
           const transporter = nodemailer.createTransport({
@@ -108,10 +126,11 @@ export async function POST(req: NextRequest) {
                 <p style="margin-top: 20px; font-weight: bold;">Donation Summary</p>
                 <ul style="list-style-type: none; padding-left: 0; margin-top: 5px;">
                   <li>• Receipt No.: ${receiptNo}</li>
-                  <li>• Donation Date: ${donationDate}</li>
+                  <li>• Date & Time: ${donationDate} at ${donationTime}</li>
                   <li>• Amount: $${amountFormatted} USD</li>
-                  <li>• Campaign: ${campaign}</li>
+                  <li>• Campaign: ${campaign} (${campaignId})</li>
                   <li>• Payment Method: ${paymentMethodStr}</li>
+                  ${donorLocation ? `<li>• Location: ${donorLocation}</li>` : ''}
                 </ul>
                 
                 <p>No goods or services were provided in exchange for this contribution. Please consult your tax adviser regarding the deductibility of your gift.</p>

@@ -5,14 +5,17 @@ import fs from 'fs';
 export interface ReceiptData {
   receiptNo: string;
   donationDate: string;
+  donationTime?: string;
   donorName: string;
   donorAddress?: string;
   donorEmail: string;
   amount: string;
   campaign: string;
+  campaignId?: string;
   contributionType: string;
   paymentMethod: string;
   transactionId: string;
+  donorLocation?: string;
 }
 
 export async function generateReceiptPDF(data: ReceiptData): Promise<Buffer> {
@@ -39,7 +42,8 @@ export async function generateReceiptPDF(data: ReceiptData): Promise<Buffer> {
       doc.font('Helvetica-Bold').text(data.receiptNo, 440, 75);
       
       doc.font('Helvetica').text('Donation Date:', 350, 90, { width: 80, align: 'right' });
-      doc.font('Helvetica-Bold').text(data.donationDate, 440, 90);
+      const fullDateStr = data.donationTime ? `${data.donationDate} at ${data.donationTime}` : data.donationDate;
+      doc.font('Helvetica-Bold').text(fullDateStr, 440, 90);
       
       doc.font('Helvetica').text('Receipt Date:', 350, 105, { width: 80, align: 'right' });
       doc.font('Helvetica-Bold').text(data.donationDate, 440, 105);
@@ -59,11 +63,21 @@ export async function generateReceiptPDF(data: ReceiptData): Promise<Buffer> {
         doc.font('Helvetica').text(data.donorAddress, 150, 205);
       }
       
-      doc.font('Helvetica').text('Email:', 50, data.donorAddress ? 225 : 205);
-      doc.font('Helvetica').text(data.donorEmail, 150, data.donorAddress ? 225 : 205);
+      const emailY = data.donorAddress ? 225 : 205;
+      doc.font('Helvetica').text('Email:', 50, emailY);
+      doc.font('Helvetica').text(data.donorEmail, 150, emailY);
+
+      if (data.donorLocation) {
+        const locY = emailY + 20;
+        doc.font('Helvetica').text('Location:', 50, locY);
+        doc.font('Helvetica').text(data.donorLocation, 150, locY);
+      }
 
       // Contribution Details Section
-      const detailsY = data.donorAddress ? 260 : 240;
+      let detailsY = data.donorAddress ? 260 : 240;
+      if (data.donorLocation) {
+        detailsY += 20;
+      }
       doc.font('Helvetica-Bold').fontSize(12).fillColor('#c00000').text('CONTRIBUTION DETAILS', 50, detailsY);
       
       // Amount / Campaign Box
@@ -74,7 +88,8 @@ export async function generateReceiptPDF(data: ReceiptData): Promise<Buffer> {
       doc.fillColor('#888888').font('Helvetica').text('CAMPAIGN', 65, boxY + 15, { align: 'right', width: 465 });
       
       doc.fillColor('#c00000').font('Helvetica-Bold').fontSize(18).text(`$${data.amount} USD`, 65, boxY + 35);
-      doc.fillColor('black').font('Helvetica-Bold').fontSize(12).text(data.campaign, 65, boxY + 40, { align: 'right', width: 465 });
+      const campaignText = data.campaignId ? `${data.campaign} (${data.campaignId})` : data.campaign;
+      doc.fillColor('black').font('Helvetica-Bold').fontSize(12).text(campaignText, 65, boxY + 40, { align: 'right', width: 465 });
 
       // Contribution Meta
       const metaY = boxY + 80;
