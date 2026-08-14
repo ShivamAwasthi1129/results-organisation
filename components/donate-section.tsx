@@ -184,7 +184,8 @@ export function DonateSection() {
         <div className="grid lg:grid-cols-2 gap-0 border border-brand-light-border shadow-sm">
           {/* Donation form */}
           <div className="p-6 sm:p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-brand-light-border bg-brand-light">
-            <h3 className="text-sm font-black tracking-widest uppercase text-brand-light-text mb-6">Choose Your Impact</h3>
+            <h3 className="text-sm font-black tracking-widest uppercase text-brand-light-text mb-6">
+              Choose Your Impact</h3>
             
             {/* Campaign Select - Moved to the Top */}
             <div className="mb-6">
