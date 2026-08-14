@@ -199,7 +199,7 @@ export default function DisastersPage() {
                       href="/donation" 
                       className="inline-flex w-full items-center justify-center gap-2 bg-foreground text-background hover:bg-brand-red hover:text-white text-sm font-bold px-4 py-3 rounded-md transition-colors duration-200 uppercase tracking-wide group/btn"
                     >
-                      Support Relief Efforts <ChevronRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+                      Donate Now <ChevronRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
                     </Link>
                   </div>
                 </div>
