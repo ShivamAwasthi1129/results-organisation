@@ -183,18 +183,18 @@ export function DonateSection() {
 
         <div className="grid lg:grid-cols-2 gap-0 border border-brand-light-border shadow-sm">
           {/* Donation form */}
-          <div className="p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-brand-light-border bg-brand-light">
+          <div className="p-6 sm:p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-brand-light-border bg-brand-light">
             <h3 className="text-sm font-black tracking-widest uppercase text-brand-light-text mb-6">Choose Your Impact</h3>
             
             {/* Campaign Select - Moved to the Top */}
             <div className="mb-6">
-              <label htmlFor="campaign-select" className="block text-sm font-bold text-brand-light-text mb-2">Select Campaign</label>
+              <label htmlFor="campaign-select" className="block text-sm font-bold text-brand-light-text mb-2">Select Disaster </label>
               <div className="relative">
                 <select
                   id="campaign-select"
                   value={campaignId}
                   onChange={(e) => handleCampaignChange(e.target.value)}
-                  className="w-full appearance-none bg-brand-light-surface border border-brand-light-border text-brand-light-text text-sm py-3 px-4 outline-none focus:border-brand-red transition-colors cursor-pointer"
+                  className="w-full appearance-none bg-brand-light-surface border border-brand-light-border text-brand-light-text text-sm py-3 pl-4 pr-10 outline-none focus:border-brand-red transition-colors cursor-pointer truncate"
                 >
                   {CAMPAIGNS.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -214,17 +214,15 @@ export function DonateSection() {
                 <button
                   key={tier.amount}
                   onClick={() => { setSelected(tier.amount); setCustom("") }}
-                  className={`w-full text-left p-4 border transition-all duration-200 ${selected === tier.amount
-                      ? "border-brand-red bg-brand-red/5"
-                      : "border-brand-light-border hover:border-brand-light-muted bg-brand-light"
-                    }`}
+                  className="w-full text-left p-4 border transition-all duration-200 border-brand-light-border hover:border-brand-light-muted bg-brand-light focus:outline-none focus:border-brand-red"
+                  style={selected === tier.amount ? { borderColor: '#c00000', backgroundColor: 'rgba(192, 0, 0, 0.05)' } : {}}
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-black text-brand-light-text">
                       ${tier.amount}{" "}
                       <span className="text-sm font-bold text-brand-red ml-1">— {tier.label}</span>
                     </span>
-                    <div className={`w-4 h-4 border-2 rounded-full flex items-center justify-center flex-shrink-0 ${selected === tier.amount ? "border-brand-red" : "border-brand-light-border"}`}>
+                    <div className="w-4 h-4 border-2 rounded-full flex items-center justify-center flex-shrink-0" style={{ borderColor: selected === tier.amount ? '#c00000' : '' }}>
                       {selected === tier.amount && <div className="w-2 h-2 bg-brand-red rounded-full" />}
                     </div>
                   </div>
@@ -246,13 +244,13 @@ export function DonateSection() {
               </div>
             </div>
 
-            {/* Redesigned Monthly Toggle Switch */}
-            <div className="flex items-center justify-between mb-8 p-4 border border-brand-light-border bg-brand-light-surface rounded-md">
+            {/* Redesigned Monthly Toggle Switch - Stackable on mobile */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 p-4 border border-brand-light-border bg-brand-light-surface rounded-md">
               <div>
                 <p className="text-sm font-bold text-brand-light-text">Monthly Recurring Donation</p>
                 <p className="text-xs text-brand-light-muted mt-0.5">Sustained support for long-term recovery</p>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer select-none">
+              <label className="relative inline-flex items-center cursor-pointer select-none self-start sm:self-auto">
                 <input 
                   type="checkbox" 
                   checked={recurring} 
@@ -277,7 +275,7 @@ export function DonateSection() {
           </div>
 
           {/* Trust panel */}
-          <div className="p-8 lg:p-12 bg-foreground flex flex-col justify-between">
+          <div className="p-6 sm:p-8 lg:p-12 bg-foreground flex flex-col justify-between">
             <div>
               <h3 className="text-sm font-black tracking-widest uppercase text-background mb-8">{d.trustHeading}</h3>
               <div className="space-y-8">
