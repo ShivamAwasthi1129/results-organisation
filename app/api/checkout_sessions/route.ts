@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2025-01-27.acacia",
+  apiVersion: "2026-06-24.dahlia" as const,
 });
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { amount, recurring } = body;
+    const { amount, recurring, campaign } = body;
 
     if (!amount || amount <= 0) {
       return NextResponse.json(
@@ -29,6 +29,9 @@ export async function POST(req: NextRequest) {
 
     const sessionData: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ["card"],
+      metadata: {
+        campaign: campaign || "General Fund",
+      },
       line_items: [
         {
           price_data: {

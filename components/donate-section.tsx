@@ -20,6 +20,18 @@ export function DonateSection() {
   const [custom, setCustom] = useState("")
   const [recurring, setRecurring] = useState(false)
   const [isPending, setIsPending] = useState(false)
+  const [campaign, setCampaign] = useState("General Fund")
+
+  const campaigns = [
+    "General Fund",
+    "Colombia Earthquake Relief 2026",
+    "Venezuela Earthquake Relief",
+    "Japan Earthquake Relief",
+    "Turkey Earthquake Relief",
+    "Chile Earthquake Relief",
+    "Typhoon Saola Relief",
+    "Mediterranean Wildfires Relief"
+  ];
 
   const handleCustom = (val: string) => { setCustom(val); setSelected(null) }
 
@@ -32,7 +44,7 @@ export function DonateSection() {
       const res = await fetch("/api/checkout_sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount, recurring }),
+        body: JSON.stringify({ amount, recurring, campaign }),
       });
       const data = await res.json();
       if (data.url) {
@@ -104,19 +116,38 @@ export function DonateSection() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between mb-8 p-4 border border-brand-light-border bg-brand-light-surface">
+            <div className="mb-6">
+              <label htmlFor="campaign-select" className="block text-sm font-bold text-brand-light-text mb-2">Select Campaign</label>
+              <div className="relative">
+                <select
+                  id="campaign-select"
+                  value={campaign}
+                  onChange={(e) => setCampaign(e.target.value)}
+                  className="w-full appearance-none bg-brand-light-surface border border-brand-light-border text-brand-light-text text-sm py-3 px-4 outline-none focus:border-brand-red transition-colors cursor-pointer"
+                >
+                  {campaigns.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-brand-light-muted">
+                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between mb-8 p-4 border border-brand-light-border bg-brand-light-surface cursor-pointer rounded-md hover:border-brand-red/30 transition-colors" onClick={() => setRecurring(!recurring)}>
               <div>
                 <p className="text-sm font-bold text-brand-light-text">Monthly Recurring Donation</p>
                 <p className="text-xs text-brand-light-muted mt-0.5">Sustained support for long-term recovery</p>
               </div>
               <button
-                onClick={() => setRecurring(!recurring)}
-                className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${recurring ? "bg-brand-red" : "bg-brand-light-border"}`}
+                onClick={(e) => { e.stopPropagation(); setRecurring(!recurring) }}
+                className={`relative w-14 h-7 rounded-full transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 ${recurring ? "bg-brand-red" : "bg-brand-light-border"}`}
                 aria-label={recurring ? "Disable recurring donation" : "Enable recurring donation"}
                 role="switch"
                 aria-checked={recurring}
               >
-                <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 shadow-sm ${recurring ? "translate-x-7" : "translate-x-1"}`} />
+                <span className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform duration-300 ease-in-out shadow-md ${recurring ? "translate-x-8" : "translate-x-1"}`} />
               </button>
             </div>
 

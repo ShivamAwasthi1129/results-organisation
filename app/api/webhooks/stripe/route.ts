@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import nodemailer from "nodemailer";
+import { generateReceiptPDF } from "@/lib/generate-receipt";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2025-01-27.acacia",
+  apiVersion: "2026-06-24.dahlia" as const,
 });
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -33,16 +34,57 @@ export async function POST(req: NextRequest) {
   // Handle the event
   switch (event.type) {
     case "checkout.session.completed":
-      const session = event.data.object as Stripe.Checkout.Session;
+      const sessionBase = event.data.object as Stripe.Checkout.Session;
+      
+      const session = await stripe.checkout.sessions.retrieve(sessionBase.id, {
+        expand: ['payment_intent', 'payment_intent.payment_method', 'subscription'],
+      });
       
       const email = session.customer_email || session.customer_details?.email;
       const amountTotal = session.amount_total;
       const amountFormatted = amountTotal ? (amountTotal / 100).toFixed(2) : "0.00";
+      
+      const campaign = session.metadata?.campaign || "General Fund";
+
+      let paymentMethodStr = "Credit Card";
+      let transactionIdStr = session.id;
+
+      if (session.payment_intent && typeof session.payment_intent !== 'string') {
+        const pi = session.payment_intent as Stripe.PaymentIntent;
+        transactionIdStr = pi.id;
+        if (pi.payment_method && typeof pi.payment_method !== 'string') {
+          const pm = pi.payment_method as Stripe.PaymentMethod;
+          if (pm.card) {
+            paymentMethodStr = `Credit Card ending in •••• ${pm.card.last4}`;
+          } else {
+            paymentMethodStr = pm.type;
+          }
+        }
+      } else if (session.subscription) {
+        paymentMethodStr = "Recurring Subscription";
+      }
 
       console.log(`Extracted email: ${email}, amount: ${amountFormatted}`);
 
       if (email) {
         try {
+          const name = session.customer_details?.name || "Donor";
+          const randomStr = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+          const receiptNo = `R3S-${new Date().getFullYear()}-${randomStr}`;
+          const donationDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+          const pdfBuffer = await generateReceiptPDF({
+            receiptNo,
+            donationDate,
+            donorName: name,
+            donorEmail: email,
+            amount: amountFormatted,
+            campaign: campaign,
+            contributionType: session.mode === 'subscription' ? 'Monthly Recurring Donation' : 'Monetary Donation',
+            paymentMethod: paymentMethodStr,
+            transactionId: transactionIdStr,
+          });
+
           const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST || "smtp.gmail.com",
             port: parseInt(process.env.SMTP_PORT || "587"),
@@ -54,19 +96,49 @@ export async function POST(req: NextRequest) {
           });
 
           await transporter.sendMail({
-            from: `"Results.org" <${process.env.EMAIL_ID}>`,
+            from: `"R3SULTS Foundation" <${process.env.EMAIL_ID}>`,
             to: email,
-            subject: "Thank You for Your Donation!",
+            subject: `Your Donation Receipt – R3SULTS Foundation (Receipt No. ${receiptNo})`,
             html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-                <h1 style="color: #e53e3e;">Thank You!</h1>
-                <p>We have successfully received your donation of <strong>$${amountFormatted}</strong>.</p>
-                <p>Your support makes a real difference and helps us continue our mission.</p>
-                <br />
-                <p>With gratitude,</p>
-                <p><strong>The Results.org Team</strong></p>
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6;">
+                <p>Dear ${name},</p>
+                <p>Thank you for your generous gift of $${amountFormatted} to R3SULTS Foundation Inc. in support of ${campaign}.</p>
+                <p>Your official tax receipt is attached to this email. Please retain it for your records.</p>
+                
+                <p style="margin-top: 20px; font-weight: bold;">Donation Summary</p>
+                <ul style="list-style-type: none; padding-left: 0; margin-top: 5px;">
+                  <li>• Receipt No.: ${receiptNo}</li>
+                  <li>• Donation Date: ${donationDate}</li>
+                  <li>• Amount: $${amountFormatted} USD</li>
+                  <li>• Campaign: ${campaign}</li>
+                  <li>• Payment Method: ${paymentMethodStr}</li>
+                </ul>
+                
+                <p>No goods or services were provided in exchange for this contribution. Please consult your tax adviser regarding the deductibility of your gift.</p>
+                
+                <p style="margin-top: 20px; font-weight: bold;">Your Impact</p>
+                <p>Your contribution helps us deliver urgent humanitarian assistance — shelter, supplies, and recovery support — to communities affected by disasters like the recent earthquakes in Venezuela. Because of donors like you, help arrives when it matters most.</p>
+                <p>Thank you for helping communities when they need it most.</p>
+                
+                <p style="margin-top: 30px;">With gratitude,</p>
+                <p>
+                  <strong>R3SULTS Foundation Inc.</strong><br/>
+                  A U.S. nonprofit organization<br/>
+                  R3SULTS.org | <a href="mailto:donations@r3sults.org">donations@r3sults.org</a>
+                </p>
+                <hr style="border: none; border-top: 1px solid #ccc; margin-top: 30px; margin-bottom: 20px;" />
+                <p style="font-size: 12px; color: #666;">
+                  Questions about your donation? Reply to this email or write to <a href="mailto:donations@r3sults.org">donations@r3sults.org</a> and reference Receipt No. ${receiptNo}.
+                </p>
               </div>
             `,
+            attachments: [
+              {
+                filename: `Receipt_${receiptNo}.pdf`,
+                content: pdfBuffer,
+                contentType: 'application/pdf'
+              }
+            ]
           });
           console.log(`Confirmation email sent to ${email}`);
         } catch (error: any) {
