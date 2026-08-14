@@ -3,14 +3,18 @@ import Stripe from "stripe";
 import nodemailer from "nodemailer";
 import { generateReceiptPDF } from "@/lib/generate-receipt";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2026-06-24.dahlia" as const,
-});
-
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 
 export async function POST(req: NextRequest) {
+  const stripeSecret = process.env.STRIPE_SECRET_KEY;
+  if (!stripeSecret) {
+    throw new Error("STRIPE_SECRET_KEY is not defined in environment variables");
+  }
+  const stripe = new Stripe(stripeSecret, {
+    apiVersion: "2026-06-24.dahlia" as const,
+  });
+
   console.log(`\n\n--- Webhook Hit at ${new Date().toISOString()} ---\n`);
 
   const payload = await req.text();
