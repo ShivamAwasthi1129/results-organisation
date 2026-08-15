@@ -142,7 +142,7 @@ export function SiteFooter() {
       <div className="border-t border-border">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} R3sults Foundation. All rights reserved. EIN: XX-XXXXXXX
+            &copy; {new Date().getFullYear()} R3sults Foundation. All rights reserved. EIN: 42-2695859
           </p>
           <div className="flex items-center gap-6">
             {[

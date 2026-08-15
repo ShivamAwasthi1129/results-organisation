@@ -136,7 +136,7 @@ export async function generateReceiptPDF(data: ReceiptData): Promise<Buffer> {
       doc.rect(0, footerY, 595, 122).fillColor('#333333').fill();
       
       doc.fillColor('white').font('Helvetica-Bold').fontSize(10).text('R3SULTS Foundation Inc.', 50, footerY + 20);
-      doc.font('Helvetica').fontSize(9).fillColor('#cccccc').text('A U.S. nonprofit organization   |   EIN: XX-XXXXXXX', 50, footerY + 35);
+      doc.font('Helvetica').fontSize(9).fillColor('#cccccc').text('A US Non Profit registered under code 501(c)(3)   |   EIN:  42-2695859', 50, footerY + 35);
       doc.text('Website: R3SULTS.org   |   Email: donations@r3sults.org', 50, footerY + 50);
       
       doc.fillColor('white').font('Helvetica-Bold').fontSize(9).text(`Receipt No.: ${data.receiptNo}`, 50, footerY + 20, { align: 'right', width: 495 });

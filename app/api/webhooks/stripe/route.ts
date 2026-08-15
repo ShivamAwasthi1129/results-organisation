@@ -154,7 +154,7 @@ export async function POST(req: NextRequest) {
                 <p style="margin-top: 30px;">With gratitude,</p>
                 <p>
                   <strong>R3SULTS Foundation Inc.</strong><br/>
-                  A U.S. nonprofit organization<br/>
+                  A US Non Profit registered under code 501(c)(3)<br/>
                   R3SULTS.org | <a href="mailto:donations@r3sults.org">donations@r3sults.org</a>
                 </p>
                 <hr style="border: none; border-top: 1px solid #ccc; margin-top: 30px; margin-bottom: 20px;" />

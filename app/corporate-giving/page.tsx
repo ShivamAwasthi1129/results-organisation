@@ -177,7 +177,7 @@ export default function CorporateGivingPage() {
             <div className="border border-border p-6">
               <p className="text-xs font-black tracking-widest uppercase text-foreground mb-3">Tax Information</p>
               <p className="text-sm text-brand-muted-text leading-relaxed">
-                R3sults Foundation is a registered 501(c)(3) organization (EIN: XX-XXXXXXX). All corporate
+                R3sults Foundation is a registered 501(c)(3) organization (EIN: 42-2695859). All corporate
                 contributions are tax-deductible to the fullest extent permitted by law. We provide all required
                 documentation for your tax records and corporate reporting.
               </p>

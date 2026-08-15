@@ -271,7 +271,7 @@ export function DonateSection() {
               {!isPending && <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />}
             </button>
             <p className="text-xs text-brand-light-muted text-center mt-4">
-              Secure 256-bit encrypted donation. Tax-deductible. EIN: XX-XXXXXXX
+              Secure 256-bit encrypted donation. Tax-deductible. EIN: 42-2695859
             </p>
           </div>
 

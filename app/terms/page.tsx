@@ -19,7 +19,7 @@ const sections = [
   {
     title: "Donations",
     content: [
-      "All donations made through this website are gifts to R3sults Foundation, a registered 501(c)(3) nonprofit organization (EIN: XX-XXXXXXX), and are tax-deductible to the fullest extent allowed by law.",
+      "All donations made through this website are gifts to R3sults Foundation, a registered 501(c)(3) nonprofit organization (EIN: 42-2695859), and are tax-deductible to the fullest extent allowed by law.",
       "Donations are processed by a PCI-DSS certified third-party payment processor. R3sults does not store payment card information.",
       "Unless otherwise designated, donations are directed to R3sults' general operating fund and allocated per our board-approved program budget.",
       "Refund requests for donations may be submitted within 30 days of the transaction date by contacting info@r3sults.org.",

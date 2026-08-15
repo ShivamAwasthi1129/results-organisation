@@ -90,7 +90,7 @@ export default function PressPage() {
               <div className="space-y-3 text-sm">
                 {[
                   { label: "Founded", value: "2004" },
-                  { label: "EIN", value: "XX-XXXXXXX" },
+                  { label: "EIN", value: "42-2695859" },
                   { label: "Headquarters", value: "Oakland Park, FL" },
                   { label: "Status", value: "501(c)(3) Nonprofit" },
                   { label: "Countries Active", value: "10+" },
