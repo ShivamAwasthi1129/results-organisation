@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ArrowRight, ShieldCheck, BarChart3, RefreshCw } from "lucide-react"
 import { useContent } from "@/lib/content-context"
 
@@ -20,117 +20,52 @@ interface CampaignData {
   tiers: { amount: number; label: string; description: string }[];
 }
 
-const CAMPAIGNS: CampaignData[] = [
-  {
-    id: "CAM-001",
-    name: "Standard Contribution",
-    location: "Global",
-    date: "Ongoing",
-    tiers: [
-      { amount: 50, label: "General Relief", description: "Supports day-to-day operations and general preparedness." },
-      { amount: 100, label: "Community Aid", description: "Fund community-led programs and resources." },
-      { amount: 250, label: "Sustaining Gift", description: "Provides ongoing support for our operational capabilities." },
-    ]
-  },
-  {
-    id: "CAM-002",
-    name: "Venezuela Earthquake Relief",
-    location: "Caracas, Venezuela",
-    date: "June 24, 2026",
-    tiers: [
-      { amount: 50, label: "Emergency Food & Water", description: "Provides immediate clean water and ration packs for a displaced family." },
-      { amount: 100, label: "Medical Supplies Kit", description: "Funds essential medical supplies and first-aid kits for disaster response." },
-      { amount: 250, label: "Temporary Shelter Tent", description: "Supplies a family-sized temporary thermal shelter for those left homeless." },
-    ]
-  },
-  {
-    id: "CAM-003",
-    name: "Japan Earthquake Relief",
-    location: "Fukushima, Japan",
-    date: "July 12, 2026",
-    tiers: [
-      { amount: 50, label: "Hygiene & Sanitation Kit", description: "Supplies hygiene products and sanitizing items for evacuation centers." },
-      { amount: 100, label: "Warm Blankets & Apparel", description: "Provides thermal blankets and cold-weather clothing for survivors." },
-      { amount: 250, label: "Rescue Team Support", description: "Funds search-and-rescue teams and structural inspection gear." },
-    ]
-  },
-  {
-    id: "CAM-004",
-    name: "Turkey Earthquake Relief",
-    location: "Van Province, Turkey",
-    date: "August 5, 2026",
-    tiers: [
-      { amount: 50, label: "Warm Meals Distribution", description: "Funds hot meals for families in temporary refugee settlements." },
-      { amount: 100, label: "Clean Water Station", description: "Helps set up temporary clean water distribution points." },
-      { amount: 250, label: "Thermal Heating Unit", description: "Supplies heating equipment to keep families safe in freezing winter temperatures." },
-    ]
-  },
-  {
-    id: "CAM-005",
-    name: "Chile Earthquake Relief",
-    location: "Valparaiso, Chile",
-    date: "August 10, 2026",
-    tiers: [
-      { amount: 50, label: "First Aid & Triage Support", description: "Provides medical kits for triage centers." },
-      { amount: 100, label: "Baby & Toddler Support", description: "Funds baby formula, diapers, and nutrition packs." },
-      { amount: 250, label: "Debris & Emergency Tool Kit", description: "Provides shovels, helmets, and tools for clear-up teams." },
-    ]
-  },
-  {
-    id: "CAM-006",
-    name: "Colombia Earthquake Relief 2026",
-    location: "Bogota, Colombia",
-    date: "March 14, 2026",
-    tiers: [
-      { amount: 50, label: "Survival Food Package", description: "Supplies high-nutrition dry food rations for a family." },
-      { amount: 100, label: "First Response Medication", description: "Funds antibiotics, bandages, and critical medication." },
-      { amount: 250, label: "Rebuilding Supplies", description: "Contributes to building materials for homes destroyed by structural failure." },
-    ]
-  },
-  {
-    id: "CAM-007",
-    name: "Typhoon Saola Relief",
-    location: "Philippines & Taiwan",
-    date: "September 2026",
-    tiers: [
-      { amount: 50, label: "Flashlights & Emergency Batteries", description: "Supplies lighting and power sources to storm victims." },
-      { amount: 100, label: "Waterproof Tarp & Rope", description: "Provides immediate protection for homes with damaged roofs." },
-      { amount: 250, label: "Water Purification Systems", description: "Funds high-volume portable filtration systems." },
-    ]
-  },
-  {
-    id: "CAM-008",
-    name: "Mediterranean Wildfires Relief",
-    location: "Greece & Italy",
-    date: "August 2026",
-    tiers: [
-      { amount: 50, label: "Respiratory Protection Gear", description: "Supplies protective smoke masks and filters." },
-      { amount: 100, label: "Wildlife Rescue & Rehab", description: "Funds treatment for animals affected by forest fires." },
-      { amount: 250, label: "Firefighter Support Kit", description: "Provides cooling equipment and hydration for volunteer responders." },
-    ]
-  }
-];
-
 export function DonateSection() {
   const { content } = useContent()
   const d = content.donate
+  const [campaigns, setCampaigns] = useState<CampaignData[]>([]);
+
+  useEffect(() => {
+    async function loadCampaigns() {
+      try {
+        const res = await fetch('/api/campaigns');
+        const data = await res.json();
+        if (data.success && data.campaigns && data.campaigns.length > 0) {
+          setCampaigns(data.campaigns);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    loadCampaigns();
+  }, []);
 
   const [campaignId, setCampaignId] = useState("CAM-001")
-  const activeCampaign = CAMPAIGNS.find(c => c.id === campaignId) || CAMPAIGNS[0];
-  const activeTiers = activeCampaign.tiers;
+  const activeCampaign = campaigns.find((c: any) => c.id === campaignId) || campaigns[0];
+  const activeTiers = activeCampaign ? activeCampaign.tiers : [];
 
-  const [selected, setSelected] = useState<number | null>(activeTiers[1]?.amount ?? 100)
+  const [selected, setSelected] = useState<number | null>(100)
   const [custom, setCustom] = useState("")
   const [recurring, setRecurring] = useState(false)
   const [isPending, setIsPending] = useState(false)
+
+  // Sync default selection once campaigns load
+  useEffect(() => {
+    if (campaigns.length > 0) {
+      const active = campaigns.find((c: any) => c.id === campaignId) || campaigns[0];
+      if (active && active.tiers && active.tiers[1]) {
+        setSelected(active.tiers[1].amount);
+      }
+    }
+  }, [campaigns, campaignId]);
 
   const handleCustom = (val: string) => { setCustom(val); setSelected(null) }
 
   const handleCampaignChange = (id: string) => {
     setCampaignId(id);
-    const targetCampaign = CAMPAIGNS.find(c => c.id === id) || CAMPAIGNS[0];
+    const targetCampaign = campaigns.find((c: any) => c.id === id) || campaigns[0];
     // Keep amount selected if it exists in the new campaign, otherwise default to second tier
-    if (selected && !targetCampaign.tiers.some(t => t.amount === selected)) {
+    if (selected && !targetCampaign.tiers.some((t: any) => t.amount === selected)) {
       setSelected(targetCampaign.tiers[1]?.amount ?? 100);
     }
   }
@@ -197,7 +132,7 @@ export function DonateSection() {
                   onChange={(e) => handleCampaignChange(e.target.value)}
                   className="w-full appearance-none bg-brand-light-surface border border-brand-light-border text-brand-light-text text-sm py-3 pl-4 pr-10 outline-none focus:border-brand-red transition-colors cursor-pointer truncate"
                 >
-                  {CAMPAIGNS.map((c) => (
+                  {campaigns.map((c: any) => (
                     <option key={c.id} value={c.id}>
                       {c.name} ({c.id}) {c.location ? `— ${c.location}` : ""} {c.date ? `| ${c.date}` : ""}
                     </option>

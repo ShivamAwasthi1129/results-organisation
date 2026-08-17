@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic"
 export default async function HomePage() {
   let initialContent: SiteContent | null = null
   try {
-    const res = await fetch(`${process.env.DOMAIN_NAME}/api/home-page-content`, {
+    const res = await fetch(`${process.env.DOMAIN_NAME}/api/home-page-content?t=${Date.now()}`, {
       headers: {
         'AUTHORIZATION_KEY': process.env.AUTHORIZATION_KEY || ""
       },

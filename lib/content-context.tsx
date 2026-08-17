@@ -29,6 +29,11 @@ export function ContentProvider({ children, initialContent }: { children: React.
     if (initialContent) {
       setContent(initialContent)
       setIsDirty(true)
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(initialContent))
+      } catch {
+        // ignore
+      }
       return
     }
     

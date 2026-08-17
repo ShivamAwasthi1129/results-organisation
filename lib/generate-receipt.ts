@@ -87,7 +87,6 @@ export async function generateReceiptPDF(data: ReceiptData): Promise<Buffer> {
       doc.rect(50, boxY, 495, 80).fillColor('#f8f9fa').fill();
       
       doc.fillColor('#888888').font('Helvetica').fontSize(9).text('DONATION AMOUNT', 65, boxY + 15);
-      doc.fillColor('#888888').font('Helvetica').text('CAMPAIGN', 65, boxY + 15, { align: 'right', width: 465 });
       
       doc.fillColor('#c00000').font('Helvetica-Bold').fontSize(18).text(`$${data.amount} USD`, 65, boxY + 35);
       const campaignText = data.campaignId ? `${data.campaign} (${data.campaignId})` : data.campaign;
