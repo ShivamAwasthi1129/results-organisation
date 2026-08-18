@@ -3,6 +3,15 @@
 import { useState, useEffect } from "react"
 import { ArrowRight, ShieldCheck, BarChart3, RefreshCw } from "lucide-react"
 import { useContent } from "@/lib/content-context"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input"
+import "react-phone-number-input/style.css"
 
 const trustIcons = [ShieldCheck, BarChart3, RefreshCw]
 const trustLabels = ["100% Transparent", "Impact Reporting", "Recurring Donations"]
@@ -49,6 +58,17 @@ export function DonateSection() {
   const [recurring, setRecurring] = useState(false)
   const [isPending, setIsPending] = useState(false)
 
+  // Modal States
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("")
+  const [modalCampaignId, setModalCampaignId] = useState("CAM-001")
+  const modalActiveCampaign = campaigns.find((c: any) => c.id === modalCampaignId) || campaigns[0];
+  const [emailError, setEmailError] = useState("")
+  const [phoneError, setPhoneError] = useState("")
+
   // Sync default selection once campaigns load
   useEffect(() => {
     if (campaigns.length > 0) {
@@ -70,11 +90,48 @@ export function DonateSection() {
     }
   }
 
-  const handleDonate = async () => {
+  const handleDonateClick = () => {
+    const amount = selected || parseFloat(custom);
+    if (!amount || amount <= 0) return;
+    setModalCampaignId(campaignId);
+    setEmailError("");
+    setPhoneError("");
+    setIsModalOpen(true);
+  }
+
+  const handleModalCampaignChange = (id: string) => {
+    setModalCampaignId(id);
+    const targetCampaign = campaigns.find((c: any) => c.id === id) || campaigns[0];
+    if (selected && !targetCampaign.tiers.some((t: any) => t.amount === selected)) {
+      setSelected(targetCampaign.tiers[1]?.amount ?? 100);
+    }
+  }
+
+  const handleModalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     const amount = selected || parseFloat(custom);
     if (!amount || amount <= 0) return;
 
+    setEmailError("");
+    setPhoneError("");
+    let hasError = false;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError("Please enter a valid email address.");
+      hasError = true;
+    }
+
+    if (!phone || !isValidPhoneNumber(phone)) {
+      setPhoneError("Please enter a valid phone number (e.g. +1234567890).");
+      hasError = true;
+    }
+
+    if (hasError) return;
+
     setIsPending(true);
+    const chosenCampaign = campaigns.find((c: any) => c.id === modalCampaignId) || activeCampaign;
+
     try {
       const res = await fetch("/api/checkout_sessions", {
         method: "POST",
@@ -82,10 +139,14 @@ export function DonateSection() {
         body: JSON.stringify({ 
           amount, 
           recurring, 
-          campaign: activeCampaign.name,
-          campaignId: activeCampaign.id,
-          campaignLocation: activeCampaign.location,
-          campaignDate: activeCampaign.date,
+          campaign: chosenCampaign.name,
+          campaignId: chosenCampaign.id,
+          campaignLocation: chosenCampaign.location,
+          campaignDate: chosenCampaign.date,
+          firstName,
+          lastName,
+          email,
+          phone,
         }),
       });
       const data = await res.json();
@@ -198,7 +259,7 @@ export function DonateSection() {
             </div>
 
             <button
-              onClick={handleDonate}
+              onClick={handleDonateClick}
               disabled={isPending || (!selected && !custom)}
               className="w-full inline-flex items-center justify-center gap-2 bg-brand-red text-white text-sm font-bold px-8 py-4 tracking-widest uppercase hover:bg-brand-red/90 active:scale-95 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -237,6 +298,159 @@ export function DonateSection() {
           </div>
         </div>
       </div>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-md w-[95vw] max-h-[92vh] overflow-y-auto bg-background text-foreground p-5 sm:p-6 rounded-lg border border-border shadow-lg scrollbar-thin">
+          <DialogHeader className="mb-3 text-left">
+            <DialogTitle className="text-xl font-black uppercase tracking-wider text-foreground">
+              Donor Information
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Please complete this quick form before proceeding to secure payment.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleModalSubmit} className="space-y-3.5">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                  First Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full bg-background border border-neutral-300 dark:border-neutral-700 rounded-md px-3 py-2 text-sm text-foreground outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                  Last Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full bg-background border border-neutral-300 dark:border-neutral-700 rounded-md px-3 py-2 text-sm text-foreground outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                Email Address *
+              </label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`w-full bg-background border ${emailError ? "border-brand-red" : "border-neutral-300 dark:border-neutral-700"} rounded-md px-3 py-2 text-sm text-foreground outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red transition-all`}
+              />
+              {emailError && <p className="text-brand-red text-xs mt-1 font-bold">{emailError}</p>}
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                Phone Number *
+              </label>
+              <PhoneInput
+                defaultCountry="US"
+                value={phone}
+                onChange={(val) => setPhone(val || "")}
+                required
+                className={`w-full bg-background border ${phoneError ? "border-brand-red" : "border-neutral-300 dark:border-neutral-700"} rounded-md px-3 py-2 text-sm text-foreground outline-none focus-within:ring-1 focus-within:ring-brand-red focus-within:border-brand-red transition-all [&_input]:outline-none [&_input]:border-none [&_input]:p-0 [&_input]:bg-transparent [&_input]:text-foreground [&_input]:ml-2`}
+              />
+              {phoneError && <p className="text-brand-red text-xs mt-1 font-bold">{phoneError}</p>}
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                Select Disaster Campaign *
+              </label>
+              <select
+                value={modalCampaignId}
+                onChange={(e) => handleModalCampaignChange(e.target.value)}
+                className="w-full bg-background border border-neutral-300 dark:border-neutral-700 rounded-md text-foreground text-sm py-2 px-3 outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red transition-all cursor-pointer"
+              >
+                {campaigns.map((c: any) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} ({c.id}) {c.location ? `— ${c.location}` : ""} {c.date ? `| ${c.date}` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Dynamic Amount Tiers (Sub-options) inside Modal */}
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                Select Donation Tier (Sub-options) *
+              </label>
+              <div className="grid grid-cols-3 gap-2 mb-2">
+                {modalActiveCampaign?.tiers?.map((tier: any) => (
+                  <button
+                    key={tier.amount}
+                    type="button"
+                    onClick={() => { setSelected(tier.amount); setCustom("") }}
+                    className="flex flex-col items-center justify-center p-2 border transition-all duration-200 border-neutral-300 dark:border-neutral-700 bg-background rounded-md focus:outline-none focus:border-brand-red text-center cursor-pointer"
+                    style={selected === tier.amount ? { borderColor: '#c00000', backgroundColor: 'rgba(192, 0, 0, 0.05)' } : {}}
+                  >
+                    <span className="font-black text-sm text-foreground">
+                      ${tier.amount}
+                    </span>
+                    <span className="text-[10px] font-bold text-brand-red truncate max-w-full">
+                      {tier.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              
+              <div className={`border rounded-md transition-all duration-200 ${custom ? "border-brand-red" : "border-neutral-300 dark:border-neutral-700"}`}>
+                <div className="flex items-center px-3 py-2">
+                  <span className="text-foreground font-black text-sm mr-2">$</span>
+                  <input
+                    type="number"
+                    value={custom}
+                    onChange={(e) => handleCustom(e.target.value)}
+                    placeholder="Or enter custom amount"
+                    className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground text-sm outline-none"
+                    min="1"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Monthly Recurring Toggle inside Modal */}
+            <div className="flex items-center justify-between gap-4 p-2.5 border border-neutral-300 dark:border-neutral-700 bg-brand-light-surface rounded-md">
+              <div>
+                <p className="text-xs font-bold text-foreground">Monthly Recurring Donation</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Sustained support for long-term recovery</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer select-none">
+                <input 
+                  type="checkbox" 
+                  checked={recurring} 
+                  onChange={() => setRecurring(!recurring)} 
+                  className="sr-only peer" 
+                />
+                <div className="w-8 h-4.5 bg-neutral-300 dark:bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-brand-red"></div>
+              </label>
+            </div>
+
+            <div className="pt-3 border-t border-border">
+              <button
+                type="submit"
+                disabled={isPending}
+                className="w-full inline-flex items-center justify-center gap-2 bg-brand-red text-white text-sm font-bold px-8 py-3.5 tracking-widest uppercase hover:bg-brand-red/90 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isPending ? "Processing..." : `Proceed to Pay $${selected || parseFloat(custom)}`}
+                {!isPending && <ArrowRight size={16} />}
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </section>
   )
 }

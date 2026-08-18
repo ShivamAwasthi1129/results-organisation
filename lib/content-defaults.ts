@@ -67,6 +67,7 @@ export type DonateContent = {
   tiers: DonateTier[]
   trustHeading: string
   legalNote: string
+  campaigns?: any[]
 }
 
 export type NewsLeadStory = {

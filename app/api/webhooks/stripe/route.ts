@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     throw new Error("STRIPE_SECRET_KEY is not defined in environment variables");
   }
   const stripe = new Stripe(stripeSecret, {
-    apiVersion: "2026-06-24.dahlia" as const,
+    apiVersion: "2026-07-29.dahlia" as const,
   });
 
   console.log(`\n\n--- Webhook Hit at ${new Date().toISOString()} ---\n`);

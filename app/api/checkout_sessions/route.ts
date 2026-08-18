@@ -8,10 +8,10 @@ export async function POST(req: NextRequest) {
       throw new Error("STRIPE_SECRET_KEY is not defined in environment variables");
     }
     const stripe = new Stripe(stripeSecret, {
-      apiVersion: "2026-06-24.dahlia" as const,
+      apiVersion: "2026-07-29.dahlia" as const,
     });
     const body = await req.json();
-    const { amount, recurring, campaign, campaignId, campaignLocation, campaignDate } = body;
+    const { amount, recurring, campaign, campaignId, campaignLocation, campaignDate, firstName, lastName, email, phone } = body;
 
     if (!amount || amount <= 0) {
       return NextResponse.json(
@@ -32,11 +32,16 @@ export async function POST(req: NextRequest) {
 
     const sessionData: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ["card"],
+      ...(email ? { customer_email: email } : {}),
       metadata: {
         campaign: campaign || "Standard Contribution",
         campaign_id: campaignId || "CAM-001",
         campaign_location: campaignLocation || "",
         campaign_date: campaignDate || "",
+        donor_first_name: firstName || "",
+        donor_last_name: lastName || "",
+        donor_phone: phone || "",
+        donor_email: email || "",
       },
       line_items: [
         {
