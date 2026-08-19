@@ -263,7 +263,7 @@ export function DonateSection() {
               disabled={isPending || (!selected && !custom)}
               className="w-full inline-flex items-center justify-center gap-2 bg-brand-red text-white text-sm font-bold px-8 py-4 tracking-widest uppercase hover:bg-brand-red/90 active:scale-95 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isPending ? "Processing..." : "Donate Now"}
+              {isPending ? "Processing..." : `Donate $${selected || parseFloat(custom) || 0}${recurring ? "/month" : ""} Now`}
               {!isPending && <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />}
             </button>
             <p className="text-xs text-brand-light-muted text-center mt-4">
@@ -444,7 +444,7 @@ export function DonateSection() {
                 disabled={isPending}
                 className="w-full inline-flex items-center justify-center gap-2 bg-brand-red text-white text-sm font-bold px-8 py-3.5 tracking-widest uppercase hover:bg-brand-red/90 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isPending ? "Processing..." : `Proceed to Pay $${selected || parseFloat(custom)}`}
+                {isPending ? "Processing..." : `Proceed to Pay $${selected || parseFloat(custom)}${recurring ? "/month" : ""}`}
                 {!isPending && <ArrowRight size={16} />}
               </button>
             </div>

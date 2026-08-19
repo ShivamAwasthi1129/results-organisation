@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import nodemailer from "nodemailer";
 import { generateReceiptPDF } from "@/lib/generate-receipt";
+import { generateCampaignReceiptPDF } from "@/lib/generate-campaign-receipt";
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -84,9 +85,40 @@ export async function POST(req: NextRequest) {
 
       console.log(`Extracted email: ${email}, amount: ${amountFormatted}`);
 
+      const isCampaign = campaignId && campaignId.startsWith("cms");
+
+      if (isCampaign) {
+        try {
+          const adminUrl = process.env.ADMIN_DASHBOARD_URL || 'http://localhost:3001';
+          const donateRes = await fetch(`${adminUrl}/api/public/campaigns/donate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              campaignId,
+              amount: amountFormatted,
+              donorFirstName: session.metadata?.donor_first_name || "",
+              donorLastName: session.metadata?.donor_last_name || "",
+              donorEmail: session.metadata?.donor_email || email,
+              donorPhone: session.metadata?.donor_phone || "",
+              stripeSessionId: session.id,
+              stripePaymentId: transactionIdStr,
+              recurring: session.mode === 'subscription',
+            }),
+          });
+          const donateData = await donateRes.json();
+          console.log("Recorded campaign donation in CMS database:", donateData);
+        } catch (e) {
+          console.error("Failed to record campaign donation in CMS database:", e);
+        }
+      }
+
       if (email) {
         try {
-          const name = session.customer_details?.name || "Donor";
+          const metaFirstName = session.metadata?.donor_first_name;
+          const metaLastName = session.metadata?.donor_last_name;
+          const name = (metaFirstName || metaLastName)
+            ? `${metaFirstName || ""} ${metaLastName || ""}`.trim()
+            : (session.customer_details?.name || "Donor");
           const randomStr = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
           const receiptNo = `R3S-${new Date().getFullYear()}-${randomStr}`;
           
@@ -94,22 +126,39 @@ export async function POST(req: NextRequest) {
           const donationDate = createdTimestamp.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
           const donationTime = createdTimestamp.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
 
-          const pdfBuffer = await generateReceiptPDF({
-            receiptNo,
-            donationDate,
-            donationTime,
-            donorName: name,
-            donorEmail: email,
-            amount: amountFormatted,
-            campaign: campaign,
-            campaignId: campaignId,
-            campaignLocation: campaignLocation || undefined,
-            campaignDate: campaignDate || undefined,
-            contributionType: session.mode === 'subscription' ? 'Monthly Recurring Donation' : 'Monetary Donation',
-            paymentMethod: paymentMethodStr,
-            transactionId: transactionIdStr,
-            donorLocation: donorLocation || undefined,
-          });
+          const pdfBuffer = isCampaign
+            ? await generateCampaignReceiptPDF({
+                receiptNo,
+                donationDate,
+                donationTime,
+                donorName: name,
+                donorEmail: email,
+                amount: amountFormatted,
+                campaign: campaign,
+                campaignId: campaignId,
+                campaignLocation: campaignLocation || undefined,
+                campaignDate: campaignDate || undefined,
+                contributionType: session.mode === 'subscription' ? 'Monthly Recurring Donation' : 'Campaign Contribution',
+                paymentMethod: paymentMethodStr,
+                transactionId: transactionIdStr,
+                donorLocation: donorLocation || undefined,
+              })
+            : await generateReceiptPDF({
+                receiptNo,
+                donationDate,
+                donationTime,
+                donorName: name,
+                donorEmail: email,
+                amount: amountFormatted,
+                campaign: campaign,
+                campaignId: campaignId,
+                campaignLocation: campaignLocation || undefined,
+                campaignDate: campaignDate || undefined,
+                contributionType: session.mode === 'subscription' ? 'Monthly Recurring Donation' : 'Monetary Donation',
+                paymentMethod: paymentMethodStr,
+                transactionId: transactionIdStr,
+                donorLocation: donorLocation || undefined,
+              });
 
           const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST || "smtp.gmail.com",
@@ -121,15 +170,46 @@ export async function POST(req: NextRequest) {
             },
           });
 
-          const campaignImpactText = campaign === "Standard Contribution" 
-            ? "various natural disasters and humanitarian crises" 
-            : campaign;
+          const emailSubject = isCampaign
+            ? `Thank you for supporting ${campaign} – Donation Receipt No. ${receiptNo}`
+            : `Your Donation Receipt – R3SULTS Foundation (Receipt No. ${receiptNo})`;
 
-          await transporter.sendMail({
-            from: `"R3SULTS Foundation" <${process.env.EMAIL_ID}>`,
-            to: email,
-            subject: `Your Donation Receipt – R3SULTS Foundation (Receipt No. ${receiptNo})`,
-            html: `
+          const emailHtml = isCampaign
+            ? `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6;">
+                <p>Dear ${name},</p>
+                <p>Thank you so much for your generous support of $${amountFormatted} towards our campaign: <strong>${campaign}</strong>.</p>
+                <p>Your official tax receipt is attached to this email. Please retain it for your records.</p>
+                
+                <p style="margin-top: 20px; font-weight: bold;">Donation Summary</p>
+                <ul style="list-style-type: none; padding-left: 0; margin-top: 5px;">
+                  <li>• Receipt No.: ${receiptNo}</li>
+                  <li>• Date & Time: ${donationDate} at ${donationTime}</li>
+                  <li>• Amount: $${amountFormatted} USD</li>
+                  <li>• Campaign: ${campaign} (${campaignId})</li>
+                  <li>• Payment Method: ${paymentMethodStr}</li>
+                  ${donorLocation ? `<li>• Location: ${donorLocation}</li>` : ''}
+                </ul>
+                
+                <p>No goods or services were provided in exchange for this contribution. Please consult your tax adviser regarding the deductibility of your gift.</p>
+                
+                <p style="margin-top: 20px; font-weight: bold;">Your Impact</p>
+                <p>Every contribution to this campaign brings us closer to achieving our goals and delivering critical aid, education, medical assistance, or community development. Thank you for your partnership in making this initiative a success!</p>
+                <p>Thank you for supporting our mission to build a better world.</p>
+                
+                <p style="margin-top: 30px;">With gratitude,</p>
+                <p>
+                  <strong>R3SULTS Foundation Inc.</strong><br/>
+                  A US Non Profit registered under code 501(c)(3)<br/>
+                  R3SULTS.org | <a href="mailto:donations@r3sults.org">donations@r3sults.org</a>
+                </p>
+                <hr style="border: none; border-top: 1px solid #ccc; margin-top: 30px; margin-bottom: 20px;" />
+                <p style="font-size: 12px; color: #666;">
+                  Questions about your donation? Reply to this email or write to <a href="mailto:donations@r3sults.org">donations@r3sults.org</a> and reference Receipt No. ${receiptNo}.
+                </p>
+              </div>
+            `
+            : `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6;">
                 <p>Dear ${name},</p>
                 <p>Thank you for your generous gift of $${amountFormatted} to R3SULTS Foundation Inc. in support of ${campaign}.</p>
@@ -148,7 +228,7 @@ export async function POST(req: NextRequest) {
                 <p>No goods or services were provided in exchange for this contribution. Please consult your tax adviser regarding the deductibility of your gift.</p>
                 
                 <p style="margin-top: 20px; font-weight: bold;">Your Impact</p>
-                <p>Your contribution helps us deliver urgent humanitarian assistance — shelter, supplies, and recovery support — to communities affected by disasters like ${campaignImpactText}. Because of donors like you, help arrives when it matters most.</p>
+                <p>Your contribution helps us deliver urgent humanitarian assistance — shelter, supplies, and recovery support — to communities affected by disasters like ${campaign === "Standard Contribution" ? "various natural disasters and humanitarian crises" : campaign}. Because of donors like you, help arrives when it matters most.</p>
                 <p>Thank you for helping communities when they need it most.</p>
                 
                 <p style="margin-top: 30px;">With gratitude,</p>
@@ -162,7 +242,13 @@ export async function POST(req: NextRequest) {
                   Questions about your donation? Reply to this email or write to <a href="mailto:donations@r3sults.org">donations@r3sults.org</a> and reference Receipt No. ${receiptNo}.
                 </p>
               </div>
-            `,
+            `;
+
+          await transporter.sendMail({
+            from: `"R3SULTS Foundation" <${process.env.EMAIL_ID}>`,
+            to: email,
+            subject: emailSubject,
+            html: emailHtml,
             attachments: [
               {
                 filename: `Receipt_${receiptNo}.pdf`,
