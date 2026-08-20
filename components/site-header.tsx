@@ -17,7 +17,7 @@ export function SiteHeader() {
 
   const navLinks = [
     { label: "Home", href: "/" },
-    // { label: "Campaigns", href: "/campaigns" },
+    { label: "Campaigns", href: "/campaigns" },
     { label: "Our Approach", href: "/#approach" },
     { label: "Impact", href: "/impact" },
     { label: "How We Operate", href: "/#operations" },
