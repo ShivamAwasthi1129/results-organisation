@@ -41,36 +41,6 @@ export default function CampaignsListClient({ initialCampaigns }: { initialCampa
       <section className="py-14 md:py-10 relative overflow-hidden bg-background">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 space-y-10">
           
-          {/* Filter & Search Bar */}
-          {/* <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-card border border-border shadow-sm">
-            <div className="relative flex-1 w-full max-w-md">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search campaigns by name, cause, or region..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-background border border-border text-foreground text-sm focus:outline-none focus:border-brand-red transition-colors"
-              />
-            </div>
-
-            <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-              {["ALL", "DISASTER_RELIEF", "EVENT", "FUNDRAISING", "EDUCATION", "MEDICAL", "COMMUNITY"].map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTypeFilter(t)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shrink-0 ${
-                    typeFilter === t
-                      ? "bg-brand-red text-white shadow-sm"
-                      : "bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {t === "ALL" ? "All Causes" : TYPE_CONFIG[t]?.label || t.replace("_", " ")}
-                </button>
-              ))}
-            </div>
-          </div> */}
-
           {/* Cards Grid */}
           {filtered.length === 0 ? (
             <div className="text-center py-24 rounded-2xl bg-card border border-dashed border-border p-8">
@@ -87,9 +57,11 @@ export default function CampaignsListClient({ initialCampaigns }: { initialCampa
               {filtered.map((campaign) => {
                 const typeCfg = TYPE_CONFIG[campaign.type] || { label: campaign.type?.replace("_", " ") || "Relief", status: "Active" };
                 const primary = campaign.primaryColor || "#c00000";
-                const progress = campaign.goalAmount && campaign.raisedAmount
-                  ? Math.min(100, (campaign.raisedAmount / campaign.goalAmount) * 100)
+                const percentage = campaign.goalAmount && campaign.raisedAmount
+                  ? (campaign.raisedAmount / campaign.goalAmount) * 100
                   : 0;
+                const isOverGoal = percentage > 100;
+                const barWidth = Math.min(100, percentage);
 
                 return (
                   <div
@@ -155,7 +127,7 @@ export default function CampaignsListClient({ initialCampaigns }: { initialCampa
                         </div>
 
                         <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed">
-                          {campaign.description || "Join us in supporting this critical campaign. Every dollar contributed goes directly to relief efforts and supplies."}
+                          {campaign.description || "Every registration and contribution brings us closer to delivering life-saving supplies, medical care, and recovery assistance to affected families."}
                         </p>
 
                         {/* Location / Stats footer */}
@@ -190,13 +162,17 @@ export default function CampaignsListClient({ initialCampaigns }: { initialCampa
                             <div className="h-2 rounded-full bg-muted overflow-hidden relative">
                               <div
                                 className="h-full rounded-full bg-brand-red transition-all duration-700"
-                                style={{ width: `${progress}%` }}
+                                style={{ width: `${barWidth}%` }}
                               />
                             </div>
                             <div className="flex justify-between text-[10px] text-muted-foreground font-medium pt-0.5">
-                              <span>{progress.toFixed(0)}% Completed</span>
+                              <span className={isOverGoal ? "text-emerald-500 font-bold" : ""}>
+                                {isOverGoal ? `+${percentage.toFixed(0)}% Funded` : `${percentage.toFixed(0)}% Completed`}
+                              </span>
                               <span>
-                                ${Math.max(0, campaign.goalAmount - (campaign.raisedAmount || 0)).toLocaleString()} left
+                                {isOverGoal
+                                  ? `+$${((campaign.raisedAmount || 0) - campaign.goalAmount).toLocaleString()} over goal`
+                                  : `$${Math.max(0, campaign.goalAmount - (campaign.raisedAmount || 0)).toLocaleString()} left`}
                               </span>
                             </div>
                           </div>

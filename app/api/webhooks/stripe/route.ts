@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import nodemailer from "nodemailer";
 import { generateReceiptPDF } from "@/lib/generate-receipt";
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
 
       console.log(`Extracted email: ${email}, amount: ${amountFormatted}`);
 
-      const isCampaign = campaignId && campaignId.startsWith("cms");
+      const isCampaign = campaignId && campaignId !== "CAM-001" && campaignId !== "Standard Contribution" && !campaignId.startsWith("DIS-");
 
       if (isCampaign) {
         try {

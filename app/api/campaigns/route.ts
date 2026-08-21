@@ -45,6 +45,7 @@ export async function GET() {
           return {
             id: c.id,
             name: c.title,
+            description: c.description || "",
             location: c.location || "",
             date: c.startDate ? new Date(c.startDate).toLocaleDateString() : "",
             tiers: (config.tiers || []).map((t: any) => ({
