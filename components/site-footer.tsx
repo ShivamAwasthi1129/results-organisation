@@ -39,7 +39,7 @@ const socials = [
   { icon: Facebook, label: "Facebook", href: "https://facebook.com" },
   { icon: Twitter, label: "Twitter / X", href: "https://x.com" },
   { icon: Instagram, label: "Instagram", href: "https://instagram.com" },
-  { icon: Linkedin, label: "LinkedIn", href: "https://linkedin.com" },
+  { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/company/r3sults-foundation-inc/" },
   { icon: Youtube, label: "YouTube", href: "https://youtube.com" },
 ]
 

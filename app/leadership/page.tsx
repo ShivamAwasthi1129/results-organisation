@@ -11,7 +11,7 @@ const leaders = [
     bio: "Katherine \"K.T.\" Catlin is a highly accomplished sales and marketing executive in the real estate and home building industries, with decades of experience driving revenue growth, market penetration, and strategic initiatives. Since 2018, as owner of KT Consulting & Associates LLC in Palm Beach, Florida, she offers specialized marketing strategies, consultations, and team-building solutions for housing professionals and property owners. From 2013 to 2023, K.T. served as Executive Officer for multiple Local Builders Associations, managing daily operations, educational programs, advocacy, budgeting, and fundraising. Earlier in her career (1989–2017), she held senior leadership roles—including Director of Sales & Marketing, Sales Manager, Regional New Homes Director, and Licensed Real Estate Broker—at major firms such as Weichert Realtors, Coldwell Banker, Century 21, and RE/MAX. K.T. has consistently earned top industry recognition, including Sales Director of the Year, Associate of the Year, and induction into the NJBA Associate Hall of Fame. A dedicated leader, she holds prestigious certifications: GRI, CSP, CMP, and CLHMS. Civically engaged, K.T. is a member of the Town of Palm Beach Architectural Review Commission and a United Way volunteer. She earned a B.A. in Fine Arts from Fairleigh Dickinson University and brings strategic vision, strong leadership, and deep industry expertise to deliver exceptional results at R3sults Foundation.",
     image: "/images/leader-kt-catlin.jpg",
     objectPosition: "center 20%",
-    linkedin: "#",
+    linkedin: "https://www.linkedin.com/company/r3sults-foundation-inc/",
     featured: true,
   },
   {
@@ -21,7 +21,7 @@ const leaders = [
     bio: "A seasoned disaster-relief and construction expert with decades of experience across the U.S. and the Caribbean. An FAA-trained operator and successful multimillion-dollar entrepreneur, Herbert brings deep operational and on-ground response expertise to large-scale disasters.",
     image: "/images/leader-herbert-tremble.jpg",
     objectPosition: "center 15%",
-    linkedin: "#",
+    linkedin: "https://www.linkedin.com/company/r3sults-foundation-inc/",
     featured: false,
   },
   {
@@ -31,7 +31,7 @@ const leaders = [
     bio: "Nationally and globally accomplished, acclaimed, and awarded 50+ year marketing, management, fundraising, and sales executive professional, specializing in new and existing real estate development and construction. He has a successful history of disaster relief preparedness and recovery.",
     image: "/images/leader-robert-august.jpg",
     objectPosition: "center 10%",
-    linkedin: "#",
+    linkedin: "https://www.linkedin.com/company/r3sults-foundation-inc/",
     featured: false,
   },
   {
@@ -41,7 +41,7 @@ const leaders = [
     bio: "An accomplished tech leader with 24 years of international experience in tech, AI, operations, marketing and business strategy. Engineering graduate from IIT, MBA from Harvard University. Lived and worked across 4 countries, bringing a global perspective to disaster tech innovation.",
     image: "/images/leader-ajay-verma.jpg",
     objectPosition: "center 15%",
-    linkedin: "#",
+    linkedin: "https://www.linkedin.com/company/r3sults-foundation-inc/",
     featured: false,
   },
   {
@@ -51,7 +51,7 @@ const leaders = [
     bio: "A veteran communicator who has shaped public perception across industries. Sam leads R3sults' media presence, amplifying our mission and ensuring our work reaches the communities, partners, and supporters who need to hear it most.",
     image: "/images/leader-sam-yates.jpg",
     objectPosition: "center 20%",
-    linkedin: "#",
+    linkedin: "https://www.linkedin.com/company/r3sults-foundation-inc/",
     featured: false,
   },
 ]
