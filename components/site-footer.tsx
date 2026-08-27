@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Facebook, Twitter, Instagram, Linkedin, Youtube, ArrowRight } from "lucide-react"
+import { Facebook,Instagram, Linkedin, Youtube, ArrowRight , X } from "lucide-react"
 
 const navGroups = [
   {
@@ -37,8 +37,8 @@ const navGroups = [
 
 const socials = [
   { icon: Facebook, label: "Facebook", href: "https://www.facebook.com/share/1JVMjiqQqS/" },
-  { icon: Twitter, label: "Twitter / X", href: "https://x.com" },
-  { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/r3sults_foundation?igsi=MXJrdjdpYjJrYzd0bA==" },
+    { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/r3sults_foundation?igsi=MXJrdjdpYjJrYzd0bA==" },
+  { icon: X, label: "Twitter / X", href: "https://x.com" },
   { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/company/r3sults-foundation-inc/" },
   { icon: Youtube, label: "YouTube", href: "https://youtube.com/@r3sultsfoundation?si=QNRgaZ4P2lmgoi-X" },
 ]
