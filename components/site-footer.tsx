@@ -38,7 +38,7 @@ const navGroups = [
 const socials = [
   { icon: Facebook, label: "Facebook", href: "https://facebook.com" },
   { icon: Twitter, label: "Twitter / X", href: "https://x.com" },
-  { icon: Instagram, label: "Instagram", href: "https://instagram.com" },
+  { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/r3sults_foundation?igsi=MXJrdjdpYjJrYzd0bA==" },
   { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/company/r3sults-foundation-inc/" },
   { icon: Youtube, label: "YouTube", href: "https://youtube.com" },
 ]
@@ -141,9 +141,14 @@ export function SiteFooter() {
       {/* Bottom bar */}
       <div className="border-t border-border">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} R3sults Foundation. All rights reserved. EIN: 42-2695859
-          </p>
+          <div className="flex flex-col gap-1 text-center md:text-left">
+            <p className="text-xs text-muted-foreground">
+              &copy; {new Date().getFullYear()} R3sults Foundation. All rights reserved. EIN: 42-2695859
+            </p>
+            <p className="text-xs text-muted-foreground/80 max-w-2xl">
+              The R3sults Foundation Inc is a nonprofit organization exempt from federal income taxes under subsection 501(c)3 of the Internal Revenue Service tax code.
+            </p>
+          </div>
           <div className="flex items-center gap-6">
             {[
               { label: "Privacy Policy", href: "/privacy" },
