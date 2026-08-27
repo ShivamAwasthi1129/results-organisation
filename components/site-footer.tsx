@@ -36,11 +36,11 @@ const navGroups = [
 ]
 
 const socials = [
-  { icon: Facebook, label: "Facebook", href: "https://facebook.com" },
+  { icon: Facebook, label: "Facebook", href: "hhttps://www.facebook.com/share/1JVMjiqQqS/" },
   { icon: Twitter, label: "Twitter / X", href: "https://x.com" },
   { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/r3sults_foundation?igsi=MXJrdjdpYjJrYzd0bA==" },
   { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/company/r3sults-foundation-inc/" },
-  { icon: Youtube, label: "YouTube", href: "https://youtube.com" },
+  { icon: Youtube, label: "YouTube", href: "https://youtube.com/@r3sultsfoundation?si=QNRgaZ4P2lmgoi-X" },
 ]
 
 export function SiteFooter() {

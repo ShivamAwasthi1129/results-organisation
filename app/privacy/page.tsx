@@ -56,7 +56,7 @@ const sections = [
   {
     title: "Contact",
     content: [
-      "For any privacy-related questions, requests, or concerns, contact our Privacy Officer at: info@r3sults.org or by mail at R3sults Foundation, 200 W Prospect Rd, Oakland Park, FL 33309.",
+      "For any privacy-related questions, requests, or concerns, contact our Privacy Officer at: info@r3sults.org or by mail at R3sults Foundation, 2120 SW , 60th Ter Miramar, FL 33023.",
       "This Privacy Policy was last updated on March 1, 2026.",
     ],
   },

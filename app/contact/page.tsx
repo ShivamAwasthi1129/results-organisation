@@ -31,7 +31,7 @@ const contactInfo = [
   {
     icon: MapPin,
     label: "Visit Us",
-    value: "200 W Prospect Rd, Oakland Park, FL 33309",
+    value: "2120 SW , 60th Ter Miramar, FL 33023",
     href: "https://maps.google.com/?q=200+W+Prospect+Rd,+Oakland+Park,+FL+33309",
   },
   {
