@@ -36,7 +36,7 @@ const navGroups = [
 ]
 
 const socials = [
-  { icon: Facebook, label: "Facebook", href: "hhttps://www.facebook.com/share/1JVMjiqQqS/" },
+  { icon: Facebook, label: "Facebook", href: "https://www.facebook.com/share/1JVMjiqQqS/" },
   { icon: Twitter, label: "Twitter / X", href: "https://x.com" },
   { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/r3sults_foundation?igsi=MXJrdjdpYjJrYzd0bA==" },
   { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/company/r3sults-foundation-inc/" },
