@@ -7,7 +7,7 @@ const navGroups = [
     label: "Organization",
     links: [
       { label: "Our Mission", href: "/about" },
-      { label: "Our Approach", href: "/#approach" },
+      { label: "Our Approach", href: "/approach" },
       { label: "Impact Reports", href: "/impact" },
       { label: "Leadership Team", href: "/leadership" },
       { label: "Financials", href: "/financials" },

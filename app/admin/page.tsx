@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ArrowLeft, Save, RotateCcw, Eye, Lock, ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react"
+import { ArrowLeft, Save, RotateCcw, Eye, Lock, ChevronDown, ChevronUp, Plus, Trash2, AlertTriangle, Globe, Construction, ToggleLeft, ToggleRight, ExternalLink } from "lucide-react"
 import { useContent } from "@/lib/content-context"
 import { defaultContent, type SiteContent } from "@/lib/content-defaults"
 
@@ -195,8 +195,284 @@ function DonateEditor({ draft, onChange }: { draft: SiteContent; onChange: (d: S
 
 // ─── Main admin page ──────────────────────────────────────────────────────────
 
-const TABS = ["Hero", "Approach", "Impact", "Stories", "Donate"] as const
+const TABS = ["Hero", "Approach", "Impact", "Stories", "Donate", "Maintenance"] as const
 type Tab = typeof TABS[number]
+
+// ─── Route definitions ────────────────────────────────────────────────────────
+
+const SITE_ROUTES: { path: string; label: string; description: string }[] = [
+  { path: "/",               label: "Home",            description: "Main landing page" },
+  { path: "/about",          label: "About",           description: "About R3sults Foundation" },
+  { path: "/campaigns",      label: "Campaigns",       description: "Active donation campaigns" },
+  { path: "/disasters",      label: "Disasters",       description: "Global disasters tracker" },
+  { path: "/contact",        label: "Contact",         description: "Contact page" },
+  { path: "/corporate-giving", label: "Corporate Giving", description: "Corporate partnerships" },
+  { path: "/donation",       label: "Donation",        description: "Donation checkout" },
+  { path: "/financials",     label: "Financials",      description: "Financial transparency" },
+  { path: "/impact",         label: "Impact",          description: "Impact metrics & stories" },
+  { path: "/leadership",     label: "Leadership",      description: "Team & leadership" },
+  { path: "/partner",        label: "Partner",         description: "Partnership opportunities" },
+  { path: "/preparedness",   label: "Preparedness",    description: "Disaster preparedness" },
+  { path: "/press",          label: "Press",           description: "Press & media" },
+  { path: "/privacy",        label: "Privacy Policy",  description: "Privacy policy page" },
+  { path: "/stories",        label: "Stories",         description: "Impact stories" },
+  { path: "/terms",          label: "Terms of Service",description: "Terms of service" },
+  { path: "/transparency",   label: "Transparency",    description: "Organizational transparency" },
+  { path: "/volunteer",      label: "Volunteer",       description: "Volunteer opportunities" },
+]
+
+// ─── Maintenance config types ─────────────────────────────────────────────────
+
+type MaintenanceConfig = {
+  globalMaintenance: boolean
+  routes: Record<string, boolean>
+}
+
+// ─── Maintenance Editor ───────────────────────────────────────────────────────
+
+function MaintenanceEditor() {
+  const [config, setConfig] = useState<MaintenanceConfig>({
+    globalMaintenance: false,
+    routes: Object.fromEntries(SITE_ROUTES.map(r => [r.path, false]))
+  })
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [lastSaved, setLastSaved] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  // Load current config
+  useEffect(() => {
+    fetch('/api/maintenance')
+      .then(r => r.json())
+      .then(data => {
+        setConfig(data)
+        setLoading(false)
+      })
+      .catch(() => {
+        setError('Failed to load maintenance config.')
+        setLoading(false)
+      })
+  }, [])
+
+  const saveConfig = async (updated: MaintenanceConfig) => {
+    setSaving(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/maintenance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setLastSaved(new Date().toLocaleTimeString())
+      } else {
+        setError('Failed to save config.')
+      }
+    } catch {
+      setError('Network error. Could not save.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const toggleGlobal = () => {
+    const updated = { ...config, globalMaintenance: !config.globalMaintenance }
+    setConfig(updated)
+    saveConfig(updated)
+  }
+
+  const toggleRoute = (path: string) => {
+    const updated = {
+      ...config,
+      routes: { ...config.routes, [path]: !config.routes[path] }
+    }
+    setConfig(updated)
+    saveConfig(updated)
+  }
+
+  const activeRouteCount = Object.values(config.routes).filter(Boolean).length
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-6 h-6 border-2 border-brand-red border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-muted-foreground">Loading maintenance config...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Error banner */}
+      {error && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-brand-red/10 border border-brand-red/30 text-brand-red text-sm">
+          <AlertTriangle size={14} />
+          {error}
+        </div>
+      )}
+
+      {/* Save status */}
+      {lastSaved && !saving && (
+        <div className="flex items-center gap-2 text-xs text-green-500">
+          <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+          Auto-saved at {lastSaved}
+        </div>
+      )}
+      {saving && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="w-3 h-3 border border-muted-foreground border-t-transparent rounded-full animate-spin" />
+          Saving...
+        </div>
+      )}
+
+      {/* Global Maintenance Toggle */}
+      <div className={`border-2 p-6 transition-all duration-300 ${
+        config.globalMaintenance
+          ? "border-brand-red bg-brand-red/5"
+          : "border-border bg-card"
+      }`}>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className={`w-10 h-10 flex items-center justify-center flex-shrink-0 transition-colors ${
+              config.globalMaintenance ? "bg-brand-red" : "bg-muted"
+            }`}>
+              <Globe size={18} className={config.globalMaintenance ? "text-white" : "text-muted-foreground"} />
+            </div>
+            <div>
+              <p className="text-sm font-black tracking-wide uppercase text-foreground">
+                Entire Website Maintenance
+              </p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                When enabled, ALL pages will show the Under Construction screen.
+                Admin panel remains accessible.
+              </p>
+              {config.globalMaintenance && (
+                <div className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-brand-red">
+                  <AlertTriangle size={11} />
+                  SITE IS CURRENTLY DOWN FOR ALL VISITORS
+                </div>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={toggleGlobal}
+            className="flex-shrink-0 transition-colors"
+            title={config.globalMaintenance ? "Disable global maintenance" : "Enable global maintenance"}
+          >
+            {config.globalMaintenance
+              ? <ToggleRight size={36} className="text-brand-red" />
+              : <ToggleLeft size={36} className="text-muted-foreground hover:text-foreground" />
+            }
+          </button>
+        </div>
+      </div>
+
+      {/* Per-route section */}
+      <div className="border border-border">
+        <div className="px-6 py-4 bg-card border-b border-border flex items-center justify-between">
+          <div>
+            <span className="text-sm font-black tracking-widest uppercase text-foreground">Page-Level Maintenance</span>
+            <span className="ml-3 text-xs text-muted-foreground">
+              {activeRouteCount > 0
+                ? <span className="text-brand-red font-bold">{activeRouteCount} page{activeRouteCount !== 1 ? 's' : ''} under maintenance</span>
+                : 'All pages are live'
+              }
+            </span>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {config.globalMaintenance && (
+              <span className="text-amber-500 font-bold">Global mode overrides these</span>
+            )}
+          </div>
+        </div>
+
+        <div className="divide-y divide-border">
+          {SITE_ROUTES.map((route) => {
+            const isActive = config.routes[route.path] === true
+            return (
+              <div
+                key={route.path}
+                className={`flex items-center justify-between px-6 py-4 transition-all duration-200 ${
+                  isActive ? "bg-brand-red/5" : "bg-background hover:bg-muted/50"
+                }`}
+              >
+                <div className="flex items-center gap-4 min-w-0">
+                  {/* Status dot */}
+                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                    isActive ? "bg-brand-red animate-pulse" : "bg-green-500"
+                  }`} />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-bold ${
+                        isActive ? "text-brand-red" : "text-foreground"
+                      }`}>
+                        {route.label}
+                      </span>
+                      <a
+                        href={route.path}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                        title={`Open ${route.path}`}
+                      >
+                        <ExternalLink size={10} />
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs text-muted-foreground font-mono">{route.path}</span>
+                      <span className="text-xs text-muted-foreground">— {route.description}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0 ml-4">
+                  {isActive && (
+                    <span className="hidden sm:inline-block text-xs font-bold text-brand-red bg-brand-red/10 px-2 py-0.5">
+                      UNDER MAINTENANCE
+                    </span>
+                  )}
+                  <button
+                    onClick={() => toggleRoute(route.path)}
+                    disabled={config.globalMaintenance}
+                    title={
+                      config.globalMaintenance
+                        ? "Global maintenance overrides this"
+                        : isActive ? `Restore ${route.label}` : `Put ${route.label} under maintenance`
+                    }
+                    className="disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+                  >
+                    {isActive
+                      ? <ToggleRight size={28} className="text-brand-red" />
+                      : <ToggleLeft size={28} className="text-muted-foreground hover:text-foreground" />
+                    }
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Preview link */}
+      <div className="flex items-center justify-between px-5 py-4 bg-muted/30 border border-border">
+        <div>
+          <p className="text-xs font-bold text-foreground">Under Construction Page Preview</p>
+          <p className="text-xs text-muted-foreground mt-0.5">See what visitors will see when a page is under maintenance</p>
+        </div>
+        <a
+          href="/maintenance"
+          target="_blank"
+          className="inline-flex items-center gap-1.5 border border-border text-xs font-bold px-4 py-2 text-foreground hover:border-brand-red hover:text-brand-red transition-colors"
+        >
+          <Eye size={12} />
+          Preview Page
+        </a>
+      </div>
+    </div>
+  )
+}
 
 export default function AdminPage() {
   const { content, updateContent, resetContent, isDirty } = useContent()
@@ -348,15 +624,19 @@ export default function AdminPage() {
         <div className="mb-6">
           <h1 className="text-lg font-black text-foreground">{activeTab} Section</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Changes are saved to your browser. Click <strong>Save Changes</strong> to apply them to the site.
+            {activeTab === "Maintenance"
+              ? "Toggle pages on/off for maintenance mode. Changes take effect immediately and are auto-saved to the server."
+              : <>Changes are saved to your browser. Click <strong>Save Changes</strong> to apply them to the site.</>
+            }
           </p>
         </div>
 
-        {activeTab === "Hero"     && <HeroEditor     draft={draft} onChange={setDraft} />}
-        {activeTab === "Approach" && <ApproachEditor draft={draft} onChange={setDraft} />}
-        {activeTab === "Impact"   && <ImpactEditor   draft={draft} onChange={setDraft} />}
-        {activeTab === "Stories"  && <StoriesEditor  draft={draft} onChange={setDraft} />}
-        {activeTab === "Donate"   && <DonateEditor   draft={draft} onChange={setDraft} />}
+        {activeTab === "Hero"        && <HeroEditor        draft={draft} onChange={setDraft} />}
+        {activeTab === "Approach"    && <ApproachEditor    draft={draft} onChange={setDraft} />}
+        {activeTab === "Impact"      && <ImpactEditor      draft={draft} onChange={setDraft} />}
+        {activeTab === "Stories"     && <StoriesEditor     draft={draft} onChange={setDraft} />}
+        {activeTab === "Donate"      && <DonateEditor      draft={draft} onChange={setDraft} />}
+        {activeTab === "Maintenance" && <MaintenanceEditor />}
 
         <div className="mt-8 pt-8 border-t border-border flex justify-end gap-3">
           <button onClick={handleReset} className="inline-flex items-center gap-2 border border-border text-sm font-bold px-6 py-3 text-muted-foreground hover:text-brand-red hover:border-brand-red transition-colors">
