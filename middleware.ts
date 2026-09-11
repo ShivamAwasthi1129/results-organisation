@@ -12,9 +12,7 @@ const BYPASS_PREFIXES = [
 
 const BYPASS_EXTENSIONS = ['.ico', '.png', '.jpg', '.jpeg', '.svg', '.webp', '.gif', '.woff', '.woff2', '.ttf', '.css', '.js', '.map']
 
-// Cookie used to persist maintenance state between requests.
-// If the admin API is unreachable, the middleware falls back to this cookie
-// so the site stays locked down instead of letting visitors through.
+// Cookie used to persist maintenance state between requests as a last resort.
 const MAINTENANCE_COOKIE = 'r3sults_maintenance_active'
 
 function shouldBypass(pathname: string): boolean {
@@ -42,11 +40,10 @@ export async function middleware(request: NextRequest) {
   try {
     let config: any = null
 
-    // Determine timeout based on environment (fast 500ms in dev, 1500ms in prod)
     const isDev = process.env.NODE_ENV !== 'production'
     const timeoutMs = isDev ? 500 : 1500
 
-    // Fetch maintenance config from Admin Dashboard public endpoint
+    // ── Primary: Admin Dashboard API ─────────────────────────────────────────
     try {
       const configRes = await fetch(`${ADMIN_DASHBOARD_URL}/api/public/maintenance`, {
         cache: 'no-store',
@@ -57,40 +54,55 @@ export async function middleware(request: NextRequest) {
         config = await configRes.json()
       }
     } catch {
-      // Fetch failed — fall through to cookie fallback below
+      // Primary fetch failed — try local API next
+    }
+
+    // ── Secondary: Local /api/maintenance (reads maintenance-config.json) ────
+    // This is the same-origin API route so it is always reachable and does not
+    // suffer from cold-start delays. It acts as a reliable fallback.
+    if (!config) {
+      try {
+        const localUrl = new URL('/api/maintenance', request.url)
+        const localRes = await fetch(localUrl.toString(), {
+          cache: 'no-store',
+          signal: AbortSignal.timeout(2000),
+          headers: { 'Accept': 'application/json' },
+        })
+        if (localRes.ok) {
+          config = await localRes.json()
+        }
+      } catch {
+        // Local fetch also failed — fall through to cookie as last resort
+      }
     }
 
     if (config) {
-      // API responded — determine maintenance state from fresh data
+      // We have fresh config — evaluate maintenance state
       const normalizedPath = pathname.length > 1 ? pathname.replace(/\/$/, '') : pathname
       const isInMaintenance =
         config.globalMaintenance === true ||
         (config.routes && config.routes[normalizedPath] === true)
 
       if (isInMaintenance) {
-        // Redirect and stamp the persistence cookie.
-        // The cookie is refreshed on every blocked request so it stays alive
-        // for as long as maintenance mode is active.
+        // Redirect and stamp the persistence cookie (refreshed on every block)
         const response = NextResponse.redirect(maintenanceUrl, 307)
         response.cookies.set(MAINTENANCE_COOKIE, '1', {
           path: '/',
-          maxAge: 60, // seconds – re-stamped on every blocked request
+          maxAge: 60, // seconds – re-stamped each blocked request
           sameSite: 'strict',
           httpOnly: true,
         })
         return response
       }
 
-      // API says maintenance is OFF — clear the cookie and let the user through
+      // Maintenance is OFF — clear cookie and let the user through
       const response = NextResponse.next()
       response.cookies.delete(MAINTENANCE_COOKIE)
       return response
     }
 
-    // API fetch failed or returned non-OK
-    // Fail-CLOSED: check the persisted cookie. If it is set the site was in
-    // maintenance mode the last time the API successfully responded, so keep
-    // blocking until we can confirm otherwise.
+    // ── Last resort: Cookie fallback ──────────────────────────────────────────
+    // Both API calls failed. Use the persisted cookie to decide.
     const maintenanceCookie = request.cookies.get(MAINTENANCE_COOKIE)
     if (maintenanceCookie?.value === '1') {
       return NextResponse.redirect(maintenanceUrl, 307)
@@ -98,8 +110,6 @@ export async function middleware(request: NextRequest) {
 
   } catch (error) {
     console.error('[Middleware] Maintenance check failed:', error)
-
-    // On unexpected error also fall back to cookie check
     const maintenanceCookie = request.cookies.get(MAINTENANCE_COOKIE)
     if (maintenanceCookie?.value === '1') {
       return NextResponse.redirect(maintenanceUrl, 307)
